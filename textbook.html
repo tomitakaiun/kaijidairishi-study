@@ -1,0 +1,3329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海事代理士試験 インタラクティブテキスト</title>
+<style>
+/* ===== CSS Variables & Reset ===== */
+:root {
+  --navy: #1a365d;
+  --navy-light: #2a4a7f;
+  --navy-dark: #0f2340;
+  --cream: #fdf6e3;
+  --cream-dark: #f5eedb;
+  --accent: #e67e22;
+  --accent-light: #f39c12;
+  --success: #27ae60;
+  --danger: #c0392b;
+  --info: #2980b9;
+  --permit-red: #e74c3c;
+  --approval-orange: #e67e22;
+  --registration-yellow: #f1c40f;
+  --notification-blue: #3498db;
+  --authorization-green: #2ecc71;
+  --report-purple: #9b59b6;
+  --text: #2c3e50;
+  --text-light: #7f8c8d;
+  --bg: var(--cream);
+  --card-bg: #ffffff;
+  --sidebar-bg: var(--navy);
+  --sidebar-text: #ecf0f1;
+  --border: #ddd;
+  --shadow: 0 2px 8px rgba(0,0,0,0.1);
+  --radius: 8px;
+  --font-body: 'Georgia', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  --font-heading: 'Helvetica Neue', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+  --font-mono: 'Consolas', 'Monaco', monospace;
+  --transition: 0.3s ease;
+}
+
+[data-theme="dark"] {
+  --navy: #1a365d;
+  --cream: #1a1a2e;
+  --cream-dark: #16213e;
+  --text: #ecf0f1;
+  --text-light: #bdc3c7;
+  --bg: #0f0f23;
+  --card-bg: #1a1a2e;
+  --border: #2c3e50;
+  --shadow: 0 2px 8px rgba(0,0,0,0.4);
+  --sidebar-bg: #0a0a1a;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { font-size:18px; scroll-behavior:smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height:1.8;
+  min-height:100vh;
+  display:flex;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar { width:8px; }
+::-webkit-scrollbar-track { background: var(--cream-dark); }
+::-webkit-scrollbar-thumb { background: var(--navy-light); border-radius:4px; }
+
+/* ===== Sidebar ===== */
+#sidebar {
+  width:300px;
+  min-width:300px;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  height:100vh;
+  position:fixed;
+  top:0; left:0;
+  overflow-y:auto;
+  z-index:1000;
+  transition: transform var(--transition), width var(--transition);
+  display:flex;
+  flex-direction:column;
+}
+
+#sidebar.collapsed { transform:translateX(-300px); }
+
+.sidebar-header {
+  padding:20px;
+  text-align:center;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  flex-shrink:0;
+}
+
+.sidebar-header h2 {
+  font-family: var(--font-heading);
+  font-size:1.1rem;
+  margin-bottom:4px;
+}
+
+.sidebar-header .subtitle {
+  font-size:0.7rem;
+  opacity:0.7;
+}
+
+.sidebar-progress {
+  padding:12px 20px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  flex-shrink:0;
+}
+
+.progress-bar-container {
+  background: rgba(255,255,255,0.1);
+  border-radius:10px;
+  height:8px;
+  overflow:hidden;
+  margin-top:6px;
+}
+
+.progress-bar-fill {
+  height:100%;
+  background: linear-gradient(90deg, var(--accent), var(--success));
+  border-radius:10px;
+  transition: width 0.5s ease;
+}
+
+.sidebar-stats {
+  display:flex;
+  justify-content:space-between;
+  font-size:0.65rem;
+  margin-top:6px;
+  opacity:0.8;
+}
+
+.sidebar-nav {
+  flex:1;
+  overflow-y:auto;
+  padding:10px 0;
+}
+
+.phase-group { margin-bottom:6px; }
+
+.phase-header {
+  padding:10px 20px;
+  font-family: var(--font-heading);
+  font-size:0.75rem;
+  font-weight:bold;
+  color: var(--accent-light);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  user-select:none;
+}
+
+.phase-header:hover { background:rgba(255,255,255,0.05); }
+
+.phase-header .arrow {
+  transition: transform var(--transition);
+  font-size:0.6rem;
+}
+
+.phase-header.expanded .arrow { transform:rotate(90deg); }
+
+.phase-lessons { display:none; }
+.phase-header.expanded + .phase-lessons { display:block; }
+
+.lesson-item {
+  padding:8px 20px 8px 36px;
+  font-size:0.7rem;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  transition: background var(--transition);
+  border-left:3px solid transparent;
+}
+
+.lesson-item:hover { background:rgba(255,255,255,0.08); }
+.lesson-item.active { background:rgba(255,255,255,0.12); border-left-color:var(--accent); }
+.lesson-item.completed .status-icon { color:var(--success); }
+.lesson-item.locked { opacity:0.5; }
+
+.status-icon { font-size:0.8rem; flex-shrink:0; width:20px; text-align:center; }
+
+/* ===== Sidebar Search ===== */
+.sidebar-search {
+  padding:10px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  flex-shrink:0;
+}
+
+.sidebar-search input {
+  width:100%;
+  padding:6px 10px;
+  border:1px solid rgba(255,255,255,0.2);
+  border-radius:4px;
+  background:rgba(255,255,255,0.08);
+  color:var(--sidebar-text);
+  font-size:0.7rem;
+  outline:none;
+}
+
+.sidebar-search input::placeholder { color:rgba(255,255,255,0.4); }
+.sidebar-search input:focus { border-color:var(--accent); }
+
+.search-results {
+  max-height:200px;
+  overflow-y:auto;
+  margin-top:6px;
+}
+
+.search-result-item {
+  padding:4px 8px;
+  font-size:0.65rem;
+  cursor:pointer;
+  border-radius:3px;
+}
+
+.search-result-item:hover { background:rgba(255,255,255,0.1); }
+
+/* ===== Top Bar ===== */
+#topbar {
+  position:fixed;
+  top:0;
+  left:300px;
+  right:0;
+  height:50px;
+  background: var(--card-bg);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+  z-index:900;
+  transition: left var(--transition), background var(--transition);
+  gap:16px;
+}
+
+#sidebar.collapsed ~ #main #topbar,
+.sidebar-collapsed #topbar { left:0; }
+
+.menu-toggle {
+  background:none;
+  border:none;
+  font-size:1.2rem;
+  cursor:pointer;
+  color:var(--text);
+  padding:4px;
+}
+
+.topbar-info {
+  flex:1;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  font-size:0.7rem;
+  font-family:var(--font-heading);
+}
+
+.streak-badge {
+  background:var(--accent);
+  color:white;
+  padding:2px 10px;
+  border-radius:12px;
+  font-size:0.65rem;
+  font-weight:bold;
+}
+
+.topbar-actions {
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.topbar-actions button {
+  background:none;
+  border:none;
+  font-size:1rem;
+  cursor:pointer;
+  color:var(--text);
+  padding:4px 8px;
+  border-radius:4px;
+  transition: background var(--transition);
+}
+
+.topbar-actions button:hover { background:rgba(0,0,0,0.05); }
+
+/* ===== Main Content ===== */
+#main {
+  flex:1;
+  margin-left:300px;
+  transition: margin-left var(--transition);
+}
+
+#sidebar.collapsed ~ #main { margin-left:0; }
+
+#content {
+  max-width:800px;
+  margin:70px auto 40px;
+  padding:0 24px 60px;
+}
+
+/* ===== Welcome Screen ===== */
+.welcome-screen {
+  text-align:center;
+  padding:60px 20px;
+}
+
+.welcome-screen h1 {
+  font-family:var(--font-heading);
+  font-size:2rem;
+  color:var(--navy);
+  margin-bottom:10px;
+}
+
+[data-theme="dark"] .welcome-screen h1 { color:var(--accent-light); }
+
+.welcome-screen .lead {
+  font-size:1rem;
+  color:var(--text-light);
+  margin-bottom:40px;
+}
+
+.welcome-cards {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap:20px;
+  margin:30px 0;
+}
+
+.welcome-card {
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  padding:24px;
+  box-shadow:var(--shadow);
+  text-align:center;
+  cursor:pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+  border:2px solid transparent;
+}
+
+.welcome-card:hover { transform:translateY(-4px); box-shadow:0 6px 20px rgba(0,0,0,0.15); }
+.welcome-card.recommended { border-color:var(--accent); }
+
+.welcome-card .emoji { font-size:2rem; margin-bottom:10px; }
+.welcome-card h3 { font-family:var(--font-heading); font-size:0.9rem; margin-bottom:6px; }
+.welcome-card p { font-size:0.7rem; color:var(--text-light); }
+
+.start-btn {
+  display:inline-block;
+  margin-top:30px;
+  padding:14px 40px;
+  background: linear-gradient(135deg, var(--navy), var(--navy-light));
+  color:white;
+  border:none;
+  border-radius:var(--radius);
+  font-size:0.9rem;
+  font-family:var(--font-heading);
+  cursor:pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.start-btn:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(26,54,93,0.4); }
+
+/* ===== Lesson Content ===== */
+.lesson-container { animation:fadeIn 0.4s ease; }
+
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+.lesson-progress-bar {
+  position:sticky;
+  top:50px;
+  background: var(--bg);
+  padding:8px 0;
+  z-index:50;
+}
+
+.lesson-progress-track {
+  height:4px;
+  background:var(--border);
+  border-radius:2px;
+  overflow:hidden;
+}
+
+.lesson-progress-fill {
+  height:100%;
+  background:linear-gradient(90deg, var(--info), var(--success));
+  width:0%;
+  transition:width 0.3s ease;
+}
+
+.lesson-header {
+  margin:20px 0 30px;
+  padding-bottom:20px;
+  border-bottom:2px solid var(--border);
+}
+
+.lesson-phase-tag {
+  display:inline-block;
+  background:var(--navy);
+  color:white;
+  padding:2px 12px;
+  border-radius:12px;
+  font-size:0.65rem;
+  font-family:var(--font-heading);
+  margin-bottom:10px;
+}
+
+.lesson-header h1 {
+  font-family:var(--font-heading);
+  font-size:1.6rem;
+  color:var(--navy);
+  margin-bottom:8px;
+}
+
+[data-theme="dark"] .lesson-header h1 { color:var(--accent-light); }
+
+.learning-objectives {
+  background:linear-gradient(135deg, rgba(26,54,93,0.05), rgba(26,54,93,0.02));
+  border-left:4px solid var(--navy);
+  padding:16px 20px;
+  border-radius:0 var(--radius) var(--radius) 0;
+  margin-top:16px;
+}
+
+.learning-objectives h3 {
+  font-family:var(--font-heading);
+  font-size:0.8rem;
+  margin-bottom:8px;
+  color:var(--navy);
+}
+
+[data-theme="dark"] .learning-objectives h3 { color:var(--accent-light); }
+
+.learning-objectives ul { list-style:none; }
+.learning-objectives li { padding:3px 0; font-size:0.8rem; }
+.learning-objectives li::before { content:"\2713 "; color:var(--success); font-weight:bold; margin-right:6px; }
+
+/* ===== Section Styles ===== */
+.lesson-section {
+  margin:30px 0;
+  padding-top:10px;
+}
+
+.lesson-section h2 {
+  font-family:var(--font-heading);
+  font-size:1.2rem;
+  color:var(--navy);
+  margin-bottom:16px;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+[data-theme="dark"] .lesson-section h2 { color:var(--accent-light); }
+
+.lesson-section h3 {
+  font-family:var(--font-heading);
+  font-size:1rem;
+  color:var(--navy-light);
+  margin:20px 0 10px;
+}
+
+[data-theme="dark"] .lesson-section h3 { color:#ddd; }
+
+.lesson-section p { margin-bottom:14px; font-size:0.9rem; }
+
+/* ===== Intro Box ===== */
+.intro-box {
+  background:linear-gradient(135deg, var(--card-bg), var(--cream-dark));
+  border-radius:var(--radius);
+  padding:24px;
+  margin:20px 0;
+  box-shadow:var(--shadow);
+  border-left:5px solid var(--accent);
+}
+
+.intro-box .scenario {
+  font-style:italic;
+  color:var(--text-light);
+  margin-bottom:12px;
+  font-size:0.85rem;
+}
+
+/* ===== Key Term Highlight ===== */
+.key-term {
+  background:linear-gradient(180deg, transparent 60%, rgba(241,196,15,0.3) 60%);
+  cursor:pointer;
+  font-weight:bold;
+  position:relative;
+  transition: background var(--transition);
+}
+
+.key-term:hover { background:rgba(241,196,15,0.4); }
+
+/* ===== Term Card Popup ===== */
+.term-popup {
+  display:none;
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:var(--card-bg);
+  border-radius:12px;
+  padding:28px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.25);
+  z-index:2000;
+  max-width:450px;
+  width:90%;
+  animation:popIn 0.25s ease;
+}
+
+@keyframes popIn { from{opacity:0;transform:translate(-50%,-50%) scale(0.9)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
+
+.term-popup.show { display:block; }
+
+.term-popup-overlay {
+  display:none;
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.4);
+  z-index:1999;
+}
+
+.term-popup-overlay.show { display:block; }
+
+.term-popup h3 {
+  font-family:var(--font-heading);
+  font-size:1.1rem;
+  margin-bottom:4px;
+  color:var(--navy);
+}
+
+[data-theme="dark"] .term-popup h3 { color:var(--accent-light); }
+
+.term-popup .reading { font-size:0.75rem; color:var(--text-light); margin-bottom:12px; }
+
+.term-popup .term-section {
+  margin:10px 0;
+  padding:10px;
+  background:var(--cream);
+  border-radius:6px;
+}
+
+[data-theme="dark"] .term-popup .term-section { background:var(--cream-dark); }
+
+.term-popup .term-section-label {
+  font-family:var(--font-heading);
+  font-size:0.7rem;
+  font-weight:bold;
+  color:var(--navy);
+  margin-bottom:4px;
+}
+
+[data-theme="dark"] .term-popup .term-section-label { color:var(--accent-light); }
+
+.term-popup .close-btn {
+  position:absolute;
+  top:12px;right:16px;
+  background:none;border:none;
+  font-size:1.2rem;cursor:pointer;
+  color:var(--text-light);
+}
+
+.term-popup .bookmark-btn {
+  margin-top:12px;
+  padding:6px 16px;
+  border:1px solid var(--accent);
+  background:transparent;
+  color:var(--accent);
+  border-radius:4px;
+  cursor:pointer;
+  font-size:0.7rem;
+  transition:all var(--transition);
+}
+
+.term-popup .bookmark-btn:hover,
+.term-popup .bookmark-btn.bookmarked {
+  background:var(--accent);
+  color:white;
+}
+
+/* ===== Info Box / Callout ===== */
+.info-box {
+  border-radius:var(--radius);
+  padding:16px 20px;
+  margin:16px 0;
+  font-size:0.85rem;
+}
+
+.info-box.tip {
+  background:rgba(39,174,96,0.08);
+  border-left:4px solid var(--success);
+}
+
+.info-box.warning {
+  background:rgba(231,76,60,0.08);
+  border-left:4px solid var(--danger);
+}
+
+.info-box.note {
+  background:rgba(41,128,185,0.08);
+  border-left:4px solid var(--info);
+}
+
+.info-box.mnemonic {
+  background:rgba(155,89,182,0.08);
+  border-left:4px solid var(--report-purple);
+}
+
+.info-box .box-title {
+  font-family:var(--font-heading);
+  font-weight:bold;
+  font-size:0.8rem;
+  margin-bottom:6px;
+}
+
+/* ===== Tables ===== */
+.styled-table {
+  width:100%;
+  border-collapse:collapse;
+  margin:16px 0;
+  font-size:0.8rem;
+  box-shadow:var(--shadow);
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+
+.styled-table thead th {
+  background:var(--navy);
+  color:white;
+  padding:10px 14px;
+  text-align:left;
+  font-family:var(--font-heading);
+  font-size:0.75rem;
+}
+
+.styled-table tbody td {
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  background:var(--card-bg);
+}
+
+.styled-table tbody tr:hover td { background:var(--cream-dark); }
+
+/* ===== Color-coded Badges ===== */
+.badge {
+  display:inline-block;
+  padding:2px 10px;
+  border-radius:12px;
+  font-size:0.7rem;
+  font-weight:bold;
+  font-family:var(--font-heading);
+  color:white;
+}
+
+.badge.permit { background:var(--permit-red); }
+.badge.approval { background:var(--approval-orange); }
+.badge.registration { background:var(--registration-yellow); color:#333; }
+.badge.notification { background:var(--notification-blue); }
+.badge.authorization { background:var(--authorization-green); }
+.badge.report { background:var(--report-purple); }
+.badge.confirmation { background:#1abc9c; }
+
+/* ===== Flowchart ===== */
+.flowchart {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:0;
+  margin:20px 0;
+  padding:20px;
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+.flow-step {
+  padding:12px 24px;
+  border-radius:var(--radius);
+  font-size:0.8rem;
+  font-family:var(--font-heading);
+  text-align:center;
+  max-width:90%;
+  position:relative;
+  border:2px solid;
+}
+
+.flow-step.blue { background:rgba(41,128,185,0.1); border-color:var(--info); color:var(--info); }
+.flow-step.red { background:rgba(231,76,60,0.1); border-color:var(--danger); color:var(--danger); }
+.flow-step.green { background:rgba(39,174,96,0.1); border-color:var(--success); color:var(--success); }
+.flow-step.orange { background:rgba(230,126,34,0.1); border-color:var(--accent); color:var(--accent); }
+
+.flow-arrow {
+  font-size:1.2rem;
+  color:var(--text-light);
+  line-height:1;
+  padding:4px 0;
+}
+
+/* ===== Diagram: Ship ===== */
+.ship-diagram {
+  margin:20px 0;
+  padding:30px;
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  text-align:center;
+}
+
+.ship-svg { max-width:100%; height:auto; }
+
+/* ===== Summary Box ===== */
+.summary-box {
+  background:linear-gradient(135deg, rgba(26,54,93,0.08), rgba(26,54,93,0.03));
+  border:2px solid var(--navy);
+  border-radius:var(--radius);
+  padding:24px;
+  margin:30px 0;
+}
+
+.summary-box h3 {
+  font-family:var(--font-heading);
+  color:var(--navy);
+  font-size:1rem;
+  margin-bottom:12px;
+}
+
+[data-theme="dark"] .summary-box { border-color:var(--accent); }
+[data-theme="dark"] .summary-box h3 { color:var(--accent-light); }
+
+.summary-box ul { list-style:none; }
+.summary-box li {
+  padding:6px 0;
+  font-size:0.85rem;
+  border-bottom:1px solid rgba(0,0,0,0.05);
+}
+.summary-box li::before { content:"\25C6 "; color:var(--accent); }
+
+/* ===== Quiz Section ===== */
+.quiz-section {
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  padding:28px;
+  margin:30px 0;
+  box-shadow:var(--shadow);
+  border:2px solid var(--info);
+}
+
+.quiz-section h3 {
+  font-family:var(--font-heading);
+  font-size:1rem;
+  color:var(--info);
+  margin-bottom:6px;
+}
+
+.quiz-subtitle { font-size:0.75rem; color:var(--text-light); margin-bottom:20px; }
+
+.quiz-question {
+  margin:20px 0;
+  padding:16px;
+  background:var(--cream);
+  border-radius:var(--radius);
+}
+
+[data-theme="dark"] .quiz-question { background:var(--cream-dark); }
+
+.quiz-question p {
+  font-weight:bold;
+  font-size:0.85rem;
+  margin-bottom:12px;
+  font-family:var(--font-heading);
+}
+
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+
+.quiz-option {
+  padding:10px 16px;
+  border:2px solid var(--border);
+  border-radius:var(--radius);
+  cursor:pointer;
+  font-size:0.8rem;
+  transition:all var(--transition);
+  background:var(--card-bg);
+}
+
+.quiz-option:hover:not(.selected) { border-color:var(--info); background:rgba(41,128,185,0.05); }
+.quiz-option.selected { border-color:var(--info); background:rgba(41,128,185,0.1); }
+.quiz-option.correct { border-color:var(--success); background:rgba(39,174,96,0.1); }
+.quiz-option.incorrect { border-color:var(--danger); background:rgba(231,76,60,0.1); }
+
+.quiz-explanation {
+  display:none;
+  margin-top:12px;
+  padding:12px;
+  background:rgba(39,174,96,0.05);
+  border-radius:6px;
+  font-size:0.8rem;
+  border-left:3px solid var(--success);
+}
+
+.quiz-explanation.show { display:block; }
+
+.quiz-result {
+  display:none;
+  text-align:center;
+  padding:20px;
+  margin-top:20px;
+  border-radius:var(--radius);
+  font-family:var(--font-heading);
+}
+
+.quiz-result.show { display:block; }
+.quiz-result.pass { background:rgba(39,174,96,0.1); border:2px solid var(--success); }
+.quiz-result.fail { background:rgba(231,76,60,0.1); border:2px solid var(--danger); }
+
+.quiz-submit-btn {
+  display:inline-block;
+  margin-top:16px;
+  padding:10px 30px;
+  background:var(--info);
+  color:white;
+  border:none;
+  border-radius:var(--radius);
+  font-size:0.85rem;
+  font-family:var(--font-heading);
+  cursor:pointer;
+  transition:all var(--transition);
+}
+
+.quiz-submit-btn:hover { background:var(--navy-light); transform:translateY(-1px); }
+.quiz-submit-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+/* ===== Lesson Navigation ===== */
+.lesson-nav {
+  display:flex;
+  justify-content:space-between;
+  margin-top:40px;
+  padding-top:20px;
+  border-top:2px solid var(--border);
+  gap:12px;
+}
+
+.lesson-nav-btn {
+  padding:12px 24px;
+  background:var(--card-bg);
+  border:2px solid var(--navy);
+  border-radius:var(--radius);
+  cursor:pointer;
+  font-family:var(--font-heading);
+  font-size:0.8rem;
+  color:var(--navy);
+  transition:all var(--transition);
+  flex:1;
+  max-width:48%;
+}
+
+.lesson-nav-btn:hover { background:var(--navy); color:white; }
+.lesson-nav-btn.next { text-align:right; }
+.lesson-nav-btn.prev { text-align:left; }
+.lesson-nav-btn .label { font-size:0.65rem; color:var(--text-light); display:block; }
+.lesson-nav-btn:hover .label { color:rgba(255,255,255,0.8); }
+
+/* ===== Expandable Card ===== */
+.expand-card {
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  margin:10px 0;
+  overflow:hidden;
+}
+
+.expand-card-header {
+  padding:12px 16px;
+  background:var(--card-bg);
+  cursor:pointer;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-family:var(--font-heading);
+  font-size:0.85rem;
+  font-weight:bold;
+  transition:background var(--transition);
+}
+
+.expand-card-header:hover { background:var(--cream-dark); }
+.expand-card-header .icon { transition:transform var(--transition); }
+.expand-card.open .expand-card-header .icon { transform:rotate(180deg); }
+
+.expand-card-body {
+  display:none;
+  padding:16px;
+  border-top:1px solid var(--border);
+  font-size:0.85rem;
+  background:var(--card-bg);
+}
+
+.expand-card.open .expand-card-body { display:block; }
+
+/* ===== Maritime Zone Diagram ===== */
+.zone-diagram {
+  margin:20px 0;
+  padding:20px;
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow-x:auto;
+}
+
+/* ===== Bookmarks Panel ===== */
+#bookmarks-panel {
+  display:none;
+  position:fixed;
+  top:50px;right:0;
+  width:320px;
+  height:calc(100vh - 50px);
+  background:var(--card-bg);
+  border-left:1px solid var(--border);
+  z-index:800;
+  overflow-y:auto;
+  padding:20px;
+  box-shadow:-4px 0 10px rgba(0,0,0,0.1);
+}
+
+#bookmarks-panel.show { display:block; }
+
+#bookmarks-panel h3 {
+  font-family:var(--font-heading);
+  font-size:1rem;
+  margin-bottom:16px;
+}
+
+.bookmark-item {
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  margin-bottom:8px;
+  cursor:pointer;
+  font-size:0.75rem;
+  transition:background var(--transition);
+}
+
+.bookmark-item:hover { background:var(--cream-dark); }
+.bookmark-item .term { font-weight:bold; }
+.bookmark-item .reading { color:var(--text-light); font-size:0.65rem; }
+
+/* ===== Route Map (simplified) ===== */
+.route-map {
+  margin:20px 0;
+  padding:24px;
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+.route-list {
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:8px;
+  font-size:0.8rem;
+}
+
+.route-item {
+  padding:8px 12px;
+  border-radius:6px;
+  border:1px solid var(--border);
+  background:var(--cream);
+}
+
+[data-theme="dark"] .route-item { background:var(--cream-dark); }
+
+.route-item .num {
+  font-family:var(--font-heading);
+  font-weight:bold;
+  color:var(--info);
+  margin-right:6px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width:768px) {
+  html { font-size:16px; }
+  #sidebar { transform:translateX(-300px); }
+  #sidebar.open { transform:translateX(0); }
+  #main { margin-left:0 !important; }
+  #topbar { left:0 !important; }
+  .route-list { grid-template-columns:1fr; }
+  .welcome-cards { grid-template-columns:1fr; }
+  .lesson-nav { flex-direction:column; }
+  .lesson-nav-btn { max-width:100%; }
+}
+
+/* ===== Print ===== */
+@media print {
+  #sidebar, #topbar, .quiz-section, .lesson-nav { display:none !important; }
+  #main { margin-left:0 !important; }
+  body { background:white; }
+  .lesson-container { max-width:100%; }
+}
+
+/* ===== Animations ===== */
+.fade-in { animation: fadeIn 0.4s ease; }
+
+/* ===== Sub-section numbering ===== */
+.section-num {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:28px; height:28px;
+  background:var(--navy);
+  color:white;
+  border-radius:50%;
+  font-size:0.75rem;
+  font-family:var(--font-heading);
+  font-weight:bold;
+}
+
+/* ===== Two-column layout ===== */
+.two-col {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin:16px 0;
+}
+
+@media(max-width:600px) { .two-col { grid-template-columns:1fr; } }
+
+.col-card {
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  padding:16px;
+  border:1px solid var(--border);
+}
+
+.col-card h4 {
+  font-family:var(--font-heading);
+  font-size:0.85rem;
+  margin-bottom:8px;
+  color:var(--navy);
+}
+
+[data-theme="dark"] .col-card h4 { color:var(--accent-light); }
+
+.col-card ul { padding-left:18px; font-size:0.8rem; }
+.col-card li { margin-bottom:4px; }
+
+/* ===== Definition list ===== */
+.def-list { margin:12px 0; }
+.def-item {
+  display:flex;
+  gap:12px;
+  padding:8px 0;
+  border-bottom:1px solid rgba(0,0,0,0.05);
+  font-size:0.85rem;
+}
+.def-label {
+  font-weight:bold;
+  font-family:var(--font-heading);
+  min-width:100px;
+  flex-shrink:0;
+  color:var(--navy);
+}
+[data-theme="dark"] .def-label { color:var(--accent-light); }
+
+/* ===== Ruby spacing ===== */
+ruby { ruby-align:center; }
+rt { font-size:0.55em; color:var(--text-light); }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <h2>海事代理士試験テキスト</h2>
+    <div class="subtitle">Maritime Agent Exam Study Guide</div>
+  </div>
+  <div class="sidebar-progress">
+    <div style="font-size:0.7rem;display:flex;justify-content:space-between;">
+      <span>全体の進捗</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="sidebar-stats">
+      <span id="completed-count">0/20 完了</span>
+      <span id="study-time">学習時間: 0分</span>
+    </div>
+  </div>
+  <div class="sidebar-search">
+    <input type="text" id="term-search" placeholder="用語を検索..." oninput="searchTerms(this.value)">
+    <div class="search-results" id="search-results"></div>
+  </div>
+  <div class="sidebar-nav" id="sidebar-nav"></div>
+</nav>
+
+<!-- Term Popup -->
+<div class="term-popup-overlay" id="term-overlay" onclick="closeTermPopup()"></div>
+<div class="term-popup" id="term-popup">
+  <button class="close-btn" onclick="closeTermPopup()">&times;</button>
+  <h3 id="term-title"></h3>
+  <div class="reading" id="term-reading"></div>
+  <div class="term-section"><div class="term-section-label">定義</div><div id="term-definition"></div></div>
+  <div class="term-section"><div class="term-section-label">具体例</div><div id="term-example"></div></div>
+  <div class="term-section"><div class="term-section-label">関連条文</div><div id="term-article"></div></div>
+  <button class="bookmark-btn" id="term-bookmark-btn" onclick="toggleBookmark()">&#9734; ブックマーク</button>
+</div>
+
+<!-- Bookmarks Panel -->
+<div id="bookmarks-panel">
+  <h3>&#9734; ブックマーク一覧</h3>
+  <div id="bookmarks-list"></div>
+</div>
+
+<!-- Main -->
+<div id="main">
+  <div id="topbar">
+    <button class="menu-toggle" onclick="toggleSidebar()" title="メニュー">&#9776;</button>
+    <div class="topbar-info">
+      <span id="current-lesson-title">ホーム</span>
+    </div>
+    <div class="topbar-actions">
+      <button onclick="toggleBookmarks()" title="ブックマーク">&#9734;</button>
+      <button onclick="toggleDarkMode()" title="ダークモード" id="dark-toggle">&#9790;</button>
+    </div>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+// ===================================================================
+// DATA: All lesson content, terms, and quizzes
+// ===================================================================
+
+const PHASES = [
+  { id:'phase1', title:'Phase 1: 法律の基礎固め', lessons:[1,2,3,4,5,6] },
+  { id:'phase2', title:'Phase 2: 海事法規コア', lessons:[7,8,9,10,11,12] },
+  { id:'phase3', title:'Phase 3: 交通・港湾・環境法', lessons:[13,14,15,16,17,18] },
+  { id:'phase4', title:'Phase 4: 残りの科目', lessons:[19,20] },
+];
+
+// Key terms database
+const TERMS = {
+  "三権分立":{reading:"さんけんぶんりつ",definition:"国家権力を立法権（国会）・行政権（内閣）・司法権（裁判所）の3つに分け、相互に監視・抑制させることで権力の濫用を防ぐ仕組み。",example:"国会が法律を作り、内閣がそれを実施し、裁判所が法律に違反していないか審査する。",article:"憲法41条（立法権）、65条（行政権）、76条（司法権）"},
+  "基本的人権":{reading:"きほんてきじんけん",definition:"人が生まれながらに持つ権利。自由権・社会権・平等権・参政権などが含まれる。",example:"船員も労働基本権（憲法28条）に基づき団結権を有する。",article:"憲法11条、97条"},
+  "違憲審査権":{reading:"いけんしんさけん",definition:"裁判所が法律や行政行為が憲法に違反していないかを審査する権限。最高裁判所が終審裁判所。",example:"ある海事関連法が基本的人権を侵害していると訴えられた場合、裁判所が審査する。",article:"憲法81条"},
+  "物権":{reading:"ぶっけん",definition:"物に対する直接的・排他的な支配権。所有権、抵当権、質権などが含まれる。",example:"船舶の所有権は物権の一種。船を自由に使用・処分できる。",article:"民法175条〜"},
+  "債権":{reading:"さいけん",definition:"特定の人に対して特定の行為（給付）を請求できる権利。",example:"傭船契約で船主は傭船料を請求する債権を持ち、傭船者は船舶を使用する債権を持つ。",article:"民法399条〜"},
+  "抵当権":{reading:"ていとうけん",definition:"債務者が債務を履行しない場合に、担保に入れた財産から優先的に弁済を受けられる権利。目的物の占有は移転しない。",example:"船舶を担保に銀行から融資を受ける場合、銀行が船舶抵当権を設定する。船は引き続き航行可能。",article:"民法369条、商法848条〜"},
+  "対抗要件":{reading:"たいこうようけん",definition:"権利の取得を第三者に主張するために必要な要件。不動産は登記、動産は引渡し。",example:"船舶の所有権移転は登記が対抗要件。登記しないと第三者に所有権を主張できない。",article:"民法177条、178条"},
+  "時効":{reading:"じこう",definition:"一定期間の経過により権利を取得（取得時効）したり、権利が消滅（消滅時効）したりする制度。",example:"傭船料の請求権は5年間行使しないと消滅時効にかかる。",article:"民法162条〜、166条〜"},
+  "善意・悪意":{reading:"ぜんい・あくい",definition:"法律用語では道徳的な意味ではなく、「善意」＝ある事実を知らないこと、「悪意」＝ある事実を知っていること。",example:"船舶の購入者が、その船に抵当権が設定されていることを知らなかった＝善意の第三者。",article:"民法各所"},
+  "共同海損":{reading:"きょうどうかいそん",definition:"船舶・積荷が共同の危険にさらされた際、その危険を回避するために故意かつ合理的に行った犠牲・費用を、利害関係者全員で分担する制度。",example:"嵐の中で船を軽くするため積荷の一部を海に投棄した場合、その損害を船主・荷主全員で分担する。",article:"商法788条〜"},
+  "船舶衝突":{reading:"せんぱくしょうとつ",definition:"船舶同士が衝突して損害が生じた場合の損害賠償制度。過失割合に応じて賠償責任を負う。",example:"A船とB船が衝突し、A船に70%、B船に30%の過失があった場合、各々の過失割合に応じて賠償する。",article:"商法797条〜"},
+  "海難救助":{reading:"かいなんきゅうじょ",definition:"海上で遭難した船舶や積荷を救助した者に報酬を支払う制度。",example:"沈みかけたタンカーを別の船が救助した場合、救助者は救助料を請求できる。",article:"商法800条〜"},
+  "船荷証券":{reading:"ふなにしょうけん",definition:"運送人が荷送人に対して発行する有価証券。貨物の受取と運送契約の証拠となり、貨物の引渡請求権を表す。",example:"海上運送で貨物を積み込んだ際に船会社が発行。B/L (Bill of Lading) とも呼ばれる。",article:"商法767条〜"},
+  "傭船契約":{reading:"ようせんけいやく",definition:"船舶の所有者が船舶を他者に貸し出す契約。定期傭船（タイムチャーター）と裸傭船（ベアボートチャーター）がある。",example:"旭タンカーがトミタ海運の船舶を定期傭船する場合、毎月傭船料を支払う。",article:"商法704条〜"},
+  "船籍港":{reading:"せんせきこう",definition:"船舶法に基づき船舶の登録をする港。船舶の「本籍地」にあたる。船体に表示する義務がある。",example:"裕洋丸の船籍港は宿毛港。船尾に「宿毛」と表示される。",article:"船舶法4条"},
+  "管海官庁":{reading:"かんかいかんちょう",definition:"船舶に関する行政事務を管轄する官庁。具体的には地方運輸局、運輸監理部、海事事務所等。",example:"船舶国籍証書の交付申請は、船籍港を管轄する管海官庁に行う。",article:"船舶法施行細則"},
+  "船舶国籍証書":{reading:"せんぱくこくせきしょうしょ",definition:"日本船舶であることを証明する公文書。船舶の登録後に管海官庁から交付される。",example:"裕洋丸には船舶国籍証書が交付されており、日本国旗を掲げる権利がある。",article:"船舶法5条"},
+  "総トン数":{reading:"そうトンすう",definition:"船舶の大きさを表す指標。船舶の閉囲場所の容積に基づいて算出される（重さではなく容積）。",example:"総トン数500トン以上の船舶は国際航海時にISPS法の適用を受ける。",article:"トン数法4条"},
+  "測度":{reading:"そくど",definition:"船舶の総トン数を計算・確定するための測定手続き。管海官庁に申請する。",example:"新造船の完成時に総トン数の測度を申請し、トン数が確定される。",article:"船舶法9条"},
+  "雇入契約":{reading:"やといいれけいやく",definition:"船員と船舶所有者の間で締結される労働契約。締結・終了時に地方運輸局長への届出が必要。",example:"船員が新しい船に乗り組む際、船舶所有者と雇入契約を締結し、地方運輸局長に届け出る。",article:"船員法32条〜"},
+  "船員手帳":{reading:"せんいんてちょう",definition:"船員の身分証明書。雇入契約の締結状況、資格等が記載される。",example:"船員が乗船する際は常に船員手帳を携帯する義務がある。",article:"船員法58条"},
+  "定期検査":{reading:"ていきけんさ",definition:"船舶安全法に基づき5年ごとに行われる総合的な検査。合格すると船舶検査証書が交付される。",example:"裕洋丸は5年に1回定期検査を受け、船舶検査証書の更新を行う。",article:"船舶安全法5条"},
+  "船舶検査証書":{reading:"せんぱくけんさしょうしょ",definition:"船舶が安全基準に適合していることを証明する公文書。有効期間は5年。",example:"検査証書がない船舶は航行できない。有効期間中に中間検査も必要。",article:"船舶安全法9条"},
+  "満載喫水線":{reading:"まんさいきっすいせん",definition:"船舶が安全に航行できる最大積載量の限度を示す線。この線以上に沈むほど貨物を積んではならない。",example:"タンカーに油を積む際、満載喫水線を超えて積載すると違法。季節や海域により線の位置が異なる。",article:"船舶安全法2条"},
+  "海技免許":{reading:"かいぎめんきょ",definition:"船舶職員として乗り組むために必要な国家資格。航海・機関・通信・電子通信の4区分がある。",example:"大型タンカーの船長には1級海技士（航海）の免許が必要。",article:"船舶職員及び小型船舶操縦者法4条"},
+  "乗組み基準":{reading:"のりくみきじゅん",definition:"船舶の大きさ・種類・航行区域に応じて、配置すべき海技免許の種類と人数を定めた基準。",example:"総トン数5,000トンの貨物船が遠洋を航行する場合、1級海技士（航海）等が必要。",article:"船舶職員及び小型船舶操縦者法18条〜"},
+  "特定港":{reading:"とくていこう",definition:"港則法において、喫水の深い船舶が出入りする港として政令で定められた港。より厳しい規制が適用される。",example:"東京港、横浜港、神戸港、大阪港などが特定港に指定されている。",article:"港則法3条"},
+  "無害通航":{reading:"むがいつうこう",definition:"外国船舶が沿岸国の領海を平和的に通過する権利。軍事演習や情報収集などを行わないことが条件。",example:"外国の貨物船が日本の領海を通過する際、停泊せず継続的に航行すれば無害通航となる。",article:"国連海洋法条約17条〜"},
+  "領海":{reading:"りょうかい",definition:"基線（通常は低潮線）から12海里（約22.2km）までの海域。沿岸国の主権が及ぶ。",example:"日本の領海内では日本の法律が適用される。外国船も無害通航権を有する。",article:"領海及び接続水域に関する法律1条"},
+  "排他的経済水域":{reading:"はいたてきけいざいすいいき",definition:"基線から200海里（約370.4km）までの海域。天然資源の探査・開発等について沿岸国に主権的権利がある。略称EEZ。",example:"日本のEEZ内の漁業資源や海底資源は日本が管理する権利を持つ。",article:"排他的経済水域及び大陸棚に関する法律1条"},
+  "内航海運業":{reading:"ないこうかいうんぎょう",definition:"日本国内の各港間で船舶により物品を運送する事業。",example:"宿毛港から大阪港へ石油製品を運ぶタンカー輸送は内航海運業。",article:"内航海運業法2条"},
+  "許可":{reading:"きょか",definition:"行政法上、法令で一般的に禁止されている行為について、特定の場合に行政庁がその禁止を解除する行為。最も厳しい規制。",example:"一般旅客定期航路事業を開始するには国土交通大臣の許可が必要。",article:"各法律の許可規定"},
+  "認可":{reading:"にんか",definition:"私人の行為を行政庁が補充してその法律上の効力を完成させる行為。",example:"旅客運賃の上限を変更するには国土交通大臣の認可が必要。",article:"海上運送法8条等"},
+  "届出":{reading:"とどけで",definition:"私人が行政庁に対し一定の事項を通知する行為。行政庁の判断を必要とせず、届出により効力が発生する。",example:"貨物定期航路事業の開始は届出で足りる（許可不要）。",article:"各法律の届出規定"},
+  "登録":{reading:"とうろく",definition:"一定の事項を行政庁の帳簿（登録簿）に記載する行為。届出より厳しく許可より緩い規制。",example:"内航海運業（総トン数100トン以上）の開始には登録が必要。",article:"内航海運業法3条"},
+};
+
+// ===== LESSONS DATA =====
+const LESSONS = [
+// ---------- LESSON 1: 憲法 ----------
+{
+  id:1, phase:1,
+  title:'憲法',
+  titleReading:'けんぽう',
+  subtitle:'全ての法律の土台を学ぶ',
+  objectives:['三権分立の仕組みを説明できる','基本的人権の種類を列挙できる','海事代理士と憲法の関係を理解する'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">あなたがこれから目指す「海事代理士」は国家資格です。国家資格は国の法律に基づいて認められるもの。では、その法律はどこから生まれるのでしょうか？答えは「憲法」です。憲法はすべての法律の頂点にある最高法規です。</div>
+  <p>海事代理士試験では、憲法の基本原理 ―― 特に<span class="key-term" data-term="基本的人権">基本的人権</span>と<span class="key-term" data-term="三権分立">三権分立</span>がよく出題されます。ここではその基礎を固めましょう。</p>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 基本的人権</h2>
+  <p>憲法が保障する人権は大きく分けて以下のカテゴリがあります。船員の労働権なども人権の一部です。</p>
+
+  <div class="two-col">
+    <div class="col-card">
+      <h4>自由権（国家からの自由）</h4>
+      <ul>
+        <li><strong>身体の自由</strong>：不当な逮捕・拘禁の禁止（31条〜）</li>
+        <li><strong>精神の自由</strong>：思想・良心の自由（19条）、表現の自由（21条）</li>
+        <li><strong>経済活動の自由</strong>：職業選択の自由（22条）、財産権の保障（29条）</li>
+      </ul>
+    </div>
+    <div class="col-card">
+      <h4>社会権（国家による自由）</h4>
+      <ul>
+        <li><strong>生存権</strong>（25条）：健康で文化的な最低限度の生活</li>
+        <li><strong>教育を受ける権利</strong>（26条）</li>
+        <li><strong>勤労の権利</strong>（27条）</li>
+        <li><strong>労働基本権</strong>（28条）：団結権・団体交渉権・争議権</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-box note">
+    <div class="box-title">海事との関連</div>
+    <p>船員は労働基本権（28条）により団結権を有します。船員法が「海の労働基準法」と呼ばれるのも、この憲法上の権利がベースです。</p>
+  </div>
+
+  <p>さらに<strong>平等権</strong>（14条）は「すべて国民は、法の下に平等」と定め、不合理な差別を禁止しています。個人の尊重（13条）は人権全体の基盤となる条文です。</p>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> 三権分立</h2>
+  <p>国家権力の暴走を防ぐために、権力を3つに分けます。</p>
+
+  <div class="flowchart">
+    <div class="flow-step blue" style="width:70%"><strong>国会（立法権）</strong><br>法律を作る機関 ー 憲法41条「国の唯一の立法機関」</div>
+    <div class="flow-arrow">&darr; 法律を執行 &darr;</div>
+    <div class="flow-step green" style="width:70%"><strong>内閣（行政権）</strong><br>法律を実施する機関 ー 憲法65条「行政権は内閣に属する」</div>
+    <div class="flow-arrow">&darr; 法律の合憲性を審査 &darr;</div>
+    <div class="flow-step red" style="width:70%"><strong>裁判所（司法権）</strong><br>法律の解釈・適用を行う機関 ー 憲法76条「司法権は裁判所に属する」</div>
+  </div>
+
+  <h3>衆議院の優越</h3>
+  <p>国会は<ruby>衆議院<rt>しゅうぎいん</rt></ruby>と<ruby>参議院<rt>さんぎいん</rt></ruby>の二院制です。意見が分かれた場合、以下の場面で衆議院が優越します：</p>
+  <ul style="margin-left:20px;font-size:0.85rem;">
+    <li><strong>法律案の議決</strong>：衆議院で可決→参議院で否決→衆議院で出席議員の2/3以上で再可決→成立</li>
+    <li><strong>予算の議決</strong>：衆議院の議決が優先</li>
+    <li><strong>条約の承認</strong>：衆議院の議決が優先</li>
+    <li><strong>内閣総理大臣の指名</strong>：衆議院の議決が優先</li>
+  </ul>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> <span class="key-term" data-term="違憲審査権">違憲審査権</span></h2>
+  <p>裁判所は法律や行政行為が憲法に違反していないかを審査する権限を持ちます（81条）。最高裁判所は「憲法の番人」と呼ばれ、<ruby>終審<rt>しゅうしん</rt></ruby>裁判所として違憲審査の最終判断を行います。</p>
+
+  <div class="info-box tip">
+    <div class="box-title">試験のポイント</div>
+    <p>重要条文番号を覚えましょう：13条（個人の尊重）、25条（生存権）、29条（財産権）、31条（適正手続）、41条（国会＝唯一の立法機関）、65条（行政権＝内閣）、76条（司法権＝裁判所）、81条（違憲審査権＝最高裁）</p>
+  </div>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>憲法は全ての法律の最高法規であり、海事代理士に関わる全ての法律の基礎</li>
+    <li>基本的人権は「自由権」「社会権」「平等権」などに分類される</li>
+    <li>三権分立：国会（立法）・内閣（行政）・裁判所（司法）が相互に抑制</li>
+    <li>衆議院は法律案・予算・条約・首相指名で参議院に優越する</li>
+    <li>最高裁判所は違憲審査権を持つ「憲法の番人」</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"三権分立における「立法権」を持つ機関はどれか？",options:["内閣","国会","裁判所","国土交通省"],answer:1,explanation:"憲法41条により、国会は「国の唯一の立法機関」です。法律を作る権限（立法権）は国会が持っています。"},
+    {q:"「健康で文化的な最低限度の生活を営む権利」を保障する憲法の条文は？",options:["13条","14条","25条","28条"],answer:2,explanation:"25条は生存権を定めています。「すべて国民は、健康で文化的な最低限度の生活を営む権利を有する」という有名な条文です。"},
+    {q:"衆議院の優越が認められないものはどれか？",options:["法律案の議決","憲法改正の発議","予算の議決","内閣総理大臣の指名"],answer:1,explanation:"憲法改正の発議は各議院の総議員の2/3以上の賛成が必要で、衆議院の優越は認められていません。両院対等です。"}
+  ]
+},
+
+// ---------- LESSON 2: 民法 ----------
+{
+  id:2, phase:1,
+  title:'民法',
+  titleReading:'みんぽう',
+  subtitle:'契約・財産・権利の基礎',
+  objectives:['契約の成立要件を理解する','物権と債権の違いを説明できる','船舶取引に関連する民法の基礎を理解する'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">ある日、船主Aさんが所有する貨物船を、B海運会社に売却することになりました。この「売買」という行為は民法のルールに基づきます。また、船舶を担保に銀行からお金を借りる「<span class="key-term" data-term="抵当権">抵当権</span>」も民法の概念です。</div>
+  <p>民法は私人間の権利義務関係を規律する法律です。海事の世界でも、船舶の売買、<span class="key-term" data-term="傭船契約">傭船契約</span>、保険契約など、あらゆる場面で民法の知識が必要になります。</p>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 契約の基本</h2>
+  <p>契約は「<ruby>申込み<rt>もうしこみ</rt></ruby>」と「<ruby>承諾<rt>しょうだく</rt></ruby>」の合致で成立します。</p>
+
+  <div class="flowchart">
+    <div class="flow-step blue">売主A「この船を1億円で売ります」（申込み）</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step green">買主B「1億円で買います」（承諾）</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step orange">契約成立（口頭でも成立する！）</div>
+  </div>
+
+  <h3>海事に関連する契約の種類</h3>
+  <table class="styled-table">
+    <thead><tr><th>契約の種類</th><th>内容</th><th>海事での具体例</th></tr></thead>
+    <tbody>
+      <tr><td><strong>売買契約</strong></td><td>物を売る・買う</td><td>船舶の売買</td></tr>
+      <tr><td><strong>賃貸借契約</strong></td><td>物を貸す・借りる</td><td>裸傭船（ベアボート）</td></tr>
+      <tr><td><strong>請負契約</strong></td><td>仕事の完成を約束</td><td>造船契約</td></tr>
+      <tr><td><strong>委任契約</strong></td><td>事務の処理を委託</td><td>海事代理士への依頼</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> <span class="key-term" data-term="物権">物権</span>と<span class="key-term" data-term="債権">債権</span></h2>
+  <p>民法上の権利は大きく「物権」と「債権」に分かれます。これは民法の最重要概念です。</p>
+
+  <div class="two-col">
+    <div class="col-card" style="border-top:4px solid var(--info)">
+      <h4>物権（物に対する権利）</h4>
+      <ul>
+        <li>物を<strong>直接的・排他的</strong>に支配する権利</li>
+        <li>誰に対しても主張できる（絶対権）</li>
+        <li>例：所有権、抵当権、質権</li>
+        <li>船舶の所有権 → 登記が<span class="key-term" data-term="対抗要件">対抗要件</span></li>
+      </ul>
+    </div>
+    <div class="col-card" style="border-top:4px solid var(--accent)">
+      <h4>債権（人に対する権利）</h4>
+      <ul>
+        <li>特定の人に対して行為を<strong>請求</strong>する権利</li>
+        <li>債権者と債務者の関係（相対権）</li>
+        <li>例：売買代金請求権、傭船料請求権</li>
+        <li>債務不履行 → 損害賠償請求</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-box note">
+    <div class="box-title">船舶における抵当権</div>
+    <p>通常、動産（不動産以外の物）には抵当権を設定できませんが、<strong>船舶は例外</strong>です。船舶は高額なため、登記制度が整備されており、<span class="key-term" data-term="抵当権">抵当権</span>を設定できます。これにより、船舶を担保に融資を受けることが可能です（船舶を手元に置いたまま航行し続けられます）。</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> 債務不履行</h2>
+  <p>債務者が約束通りの行為をしない場合を「債務不履行」といいます。3つのパターンがあります。</p>
+
+  <table class="styled-table">
+    <thead><tr><th>種類</th><th>内容</th><th>海事での例</th></tr></thead>
+    <tbody>
+      <tr><td><strong>履行遅滞</strong></td><td>期限に遅れた</td><td>船舶の引渡日を過ぎても引き渡さない</td></tr>
+      <tr><td><strong>履行不能</strong></td><td>履行が不可能になった</td><td>売買対象の船舶が沈没した</td></tr>
+      <tr><td><strong>不完全履行</strong></td><td>履行はしたが不十分</td><td>修理を依頼したが不完全な修理だった</td></tr>
+    </tbody>
+  </table>
+  <p>債務不履行の場合、債権者は<strong>損害賠償請求</strong>や<strong>契約解除</strong>ができます。</p>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">4</span> <span class="key-term" data-term="時効">時効</span>と<span class="key-term" data-term="善意・悪意">善意・悪意</span></h2>
+
+  <div class="two-col">
+    <div class="col-card">
+      <h4>時効</h4>
+      <ul>
+        <li><strong>取得時効</strong>：一定期間の占有で権利取得（20年/10年）</li>
+        <li><strong>消滅時効</strong>：一定期間の権利不行使で消滅</li>
+        <li>債権の消滅時効：権利行使できると知った時から<strong>5年</strong>（166条）</li>
+      </ul>
+    </div>
+    <div class="col-card">
+      <h4>善意・悪意</h4>
+      <ul>
+        <li><strong>善意</strong> = ある事実を<strong>知らない</strong>こと</li>
+        <li><strong>悪意</strong> = ある事実を<strong>知っている</strong>こと</li>
+        <li>道徳的な意味ではない！法律独自の用語</li>
+        <li>善意の第三者は保護されることが多い</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-box mnemonic">
+    <div class="box-title">覚え方</div>
+    <p>「善意＝知らない」「悪意＝知っている」。善人・悪人という意味ではありません。法律用語では「知っているか知らないか」だけの話です。</p>
+  </div>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>契約は「申込み」と「承諾」の合致で成立する</li>
+    <li>物権＝物に対する直接的・排他的な権利、債権＝人に対する請求権</li>
+    <li>船舶は動産だが例外的に登記制度があり、抵当権を設定できる</li>
+    <li>債務不履行には履行遅滞・履行不能・不完全履行の3種類がある</li>
+    <li>善意＝知らない、悪意＝知っている（道徳的意味ではない）</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"物権と債権の違いについて、正しいものはどれか？",options:["物権は特定の人にのみ主張できる","債権は誰に対しても主張できる","物権は物に対する排他的な支配権である","債権は物に対する直接の支配権である"],answer:2,explanation:"物権は物に対する直接的・排他的な支配権であり、誰に対しても主張できる絶対権です。債権は特定の人に対して行為を請求する相対権です。"},
+    {q:"船舶に抵当権を設定できる理由として最も適切なものは？",options:["船舶は不動産だから","船舶には登記制度が整備されているから","船舶は動産だから抵当権は設定できない","船舶法で特別に認められているから"],answer:1,explanation:"船舶は法律上は動産ですが、高額であり登記制度が整備されているため、例外的に抵当権の設定が認められています。"},
+    {q:"民法における「善意」の意味は？",options:["心が善良であること","ある事実を知らないこと","相手のためを思うこと","法律に違反しないこと"],answer:1,explanation:"民法の「善意」は道徳的な意味ではなく、単に「ある事実を知らないこと」を指す法律用語です。"}
+  ]
+},
+
+// ---------- LESSON 3: 商法 ----------
+{
+  id:3, phase:1,
+  title:'商法（海商）',
+  titleReading:'しょうほう（かいしょう）',
+  subtitle:'海の取引ルールを学ぶ',
+  objectives:['共同海損の仕組みを説明できる','船舶衝突時の責任を理解する','海難救助の基本を理解する'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">嵐の中、貨物船が転覆の危険に直面。船長は船を守るため、甲板上のコンテナ10個を海に投棄する決断をしました。この損害は誰が負担するのでしょうか？── これが「<span class="key-term" data-term="共同海損">共同海損</span>」の考え方です。</div>
+  <p>商法の中でも「海商」と呼ばれる部分は、海上取引特有のルールを定めています。何百年もの歴史を持つ海のルールを学びましょう。</p>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 商法の基礎</h2>
+  <p>商法は商人の取引に関する法律です。民法の「特別法」にあたり、民法よりも優先適用されます。</p>
+
+  <div class="def-list">
+    <div class="def-item"><span class="def-label">商人</span><span>自己の名をもって商行為をすることを業とする者</span></div>
+    <div class="def-item"><span class="def-label">商行為</span><span>投機売買、仲介、運送、保険など法定された行為</span></div>
+    <div class="def-item"><span class="def-label">海商</span><span>商法の中で海上運送・船舶に関する特別規定を集めた部分</span></div>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> <span class="key-term" data-term="共同海損">共同海損</span>（General Average）</h2>
+  <p>海上の共同危険を回避するために行った犠牲・費用を、利害関係者全員で分担する制度です。</p>
+
+  <div class="flowchart">
+    <div class="flow-step red">共同の危険発生（嵐、浸水など）</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step orange">船長が故意かつ合理的に犠牲を決断（積荷投棄、曳航費用など）</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step blue">犠牲により船舶・残りの積荷が助かる</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step green">犠牲の費用を船主・荷主などが価値の割合に応じて分担</div>
+  </div>
+
+  <div class="info-box note">
+    <div class="box-title">共同海損の3要件</div>
+    <p>1. 船舶と積荷に<strong>共同の危険</strong>が存在すること<br>
+    2. その危険を回避するために<strong>故意かつ合理的</strong>に犠牲を行ったこと<br>
+    3. その犠牲が<strong>奏功</strong>したこと（船舶や積荷の一部が助かったこと）</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> <span class="key-term" data-term="船舶衝突">船舶衝突</span>と<span class="key-term" data-term="海難救助">海難救助</span></h2>
+
+  <div class="two-col">
+    <div class="col-card">
+      <h4>船舶衝突</h4>
+      <ul>
+        <li>過失割合に応じて損害賠償</li>
+        <li>双方に過失 → 過失割合に応じ分担</li>
+        <li>一方のみ過失 → その船が全額賠償</li>
+        <li>不可抗力 → 各自負担</li>
+        <li>損害賠償請求権は<strong>2年</strong>で時効消滅</li>
+      </ul>
+    </div>
+    <div class="col-card">
+      <h4>海難救助</h4>
+      <ul>
+        <li>遭難船舶等を救助した者は報酬請求権を有する</li>
+        <li>報酬額は救助の困難さ・危険度・成果などを考慮</li>
+        <li><strong>不成功無報酬の原則</strong>（No Cure, No Pay）</li>
+        <li>環境損害防止の場合は例外あり</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">4</span> 運送と<span class="key-term" data-term="船荷証券">船荷証券</span></h2>
+  <p>海上運送では、運送人が荷送人に<ruby>船荷証券<rt>ふなにしょうけん</rt></ruby>（B/L: Bill of Lading）を発行します。</p>
+
+  <div class="info-box tip">
+    <div class="box-title">船荷証券の3つの機能</div>
+    <p><strong>1. 受取証</strong>：運送人が貨物を受け取った証拠<br>
+    <strong>2. 運送契約の証拠</strong>：運送条件を記載<br>
+    <strong>3. 有価証券（権利証券）</strong>：B/Lを持つ人が貨物の引渡しを請求できる</p>
+  </div>
+
+  <p><span class="key-term" data-term="傭船契約">傭船契約</span>にも触れておきましょう。定期傭船（タイムチャーター）は船員付きで一定期間船舶を借りる契約、裸傭船（ベアボートチャーター）は船体だけを借りて自分で船員を手配する契約です。</p>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>共同海損：共同危険の回避のための犠牲を、利害関係者全員で分担する制度</li>
+    <li>船舶衝突：過失割合に応じた損害賠償。時効は2年</li>
+    <li>海難救助：不成功無報酬の原則（No Cure, No Pay）</li>
+    <li>船荷証券：受取証＋運送契約の証拠＋有価証券の3機能</li>
+    <li>傭船契約には定期傭船（タイムチャーター）と裸傭船（ベアボート）がある</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"共同海損が成立するための要件として正しくないものはどれか？",options:["共同の危険が存在すること","故意かつ合理的な犠牲であること","犠牲が奏功したこと","船長以外の者が犠牲を決断したこと"],answer:3,explanation:"共同海損の犠牲は通常、船長の判断で行われます。「船長以外の者が決断した」は要件ではなく、むしろ船長の権限に基づく判断が前提です。"},
+    {q:"海難救助の「No Cure, No Pay」原則の意味は？",options:["報酬は事前に決定する","救助に成功しなければ報酬は発生しない","救助費用は保険で全額カバーされる","救助者は報酬を請求できない"],answer:1,explanation:"「No Cure, No Pay（不成功無報酬）」は、救助に成功した場合のみ報酬が支払われるという原則です。"},
+    {q:"船荷証券（B/L）の機能として含まれないものは？",options:["貨物の受取証","運送契約の証拠","船舶の所有権証明","有価証券としての機能"],answer:2,explanation:"船荷証券は貨物に関する証券であり、船舶の所有権を証明するものではありません。船舶の所有権は船舶登記で証明します。"}
+  ]
+},
+
+// ---------- LESSON 4: 国土交通省設置法 ----------
+{
+  id:4, phase:1,
+  title:'国土交通省設置法',
+  titleReading:'こくどこうつうしょうせっちほう',
+  subtitle:'海事行政の組織を理解する',
+  objectives:['海事局の組織構造を説明できる','根拠法令の区別ができる','地方運輸局と海事事務所の役割を理解する'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">海事代理士として仕事をするとき、「この手続きはどこの役所に申請するの？」という疑問が必ず出てきます。国土交通省の中で「海の仕事」を担当するのが海事局。その組織のしくみを理解しましょう。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 組織の全体像</h2>
+
+  <div class="flowchart">
+    <div class="flow-step blue" style="width:60%"><strong>国土交通省（本省）</strong><br>海事局・各課</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step green" style="width:70%"><strong>地方運輸局</strong>（全国に設置）<br>＋ 神戸運輸監理部（特別な位置づけ）</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step orange" style="width:50%"><strong>海事事務所</strong><br>現場レベルの事務</div>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> 根拠法令の区別（超重要！）</h2>
+  <p>各組織について、「何が」「何で」定められているかが試験で問われます。</p>
+
+  <table class="styled-table">
+    <thead><tr><th>組織</th><th>設置・名称等の事項</th><th>根拠法令</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2"><strong>本省（海事局）</strong></td><td>外局の所掌事務・置かれること</td><td><span class="badge notification">令</span>（国土交通省組織令）</td></tr>
+      <tr><td>設置・課・室</td><td><span class="badge permit">法</span>（国土交通省設置法）</td></tr>
+      <tr><td rowspan="2"><strong>地方運輸局</strong></td><td>名称・位置・管轄区域</td><td><span class="badge notification">令</span>（組織令）</td></tr>
+      <tr><td>名称・定員</td><td><span class="badge report">地方規則</span>（地方運輸局組織細則）</td></tr>
+      <tr><td><strong>神戸運輸監理部</strong></td><td>所掌事務・課の設置</td><td><span class="badge report">地方規則</span></td></tr>
+      <tr><td><strong>海事事務所</strong></td><td>所掌事務</td><td><span class="badge report">地方規則</span></td></tr>
+      <tr><td><strong>海技試験官</strong></td><td>設置</td><td><span class="badge authorization">省規則</span>（国土交通省組織規則）</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box mnemonic">
+    <div class="box-title">覚え方のコツ</div>
+    <p>法令のヒエラルキー：<strong>法 ＞ 令 ＞ 省規則 ＞ 地方規則</strong><br>
+    大きな組織ほど上位の法令で定める。海事事務所のような末端は地方規則で十分。</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> 海事局の各課</h2>
+  <p>海事局には以下の課があります。特に<strong>船舶産業課</strong>の所掌事務は試験で問われやすいです。</p>
+
+  <div class="two-col">
+    <div class="col-card">
+      <h4>政策・管理系</h4>
+      <ul>
+        <li>総務課</li>
+        <li>安全政策課</li>
+        <li>海洋・環境政策課</li>
+        <li>船員政策課</li>
+      </ul>
+    </div>
+    <div class="col-card">
+      <h4>事業・技術系</h4>
+      <ul>
+        <li>外航課</li>
+        <li>内航課</li>
+        <li><strong>船舶産業課</strong></li>
+        <li>検査測度課</li>
+        <li>海技課</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-box warning">
+    <div class="box-title">試験頻出：船舶産業課の所掌事務</div>
+    <p>船舶（<strong>船用品及び造船施設を含む</strong>）の生産・流通・消費の増進・改善・調整、船舶の<strong>再資源化解体</strong>（シップリサイクル）を担当します。</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">4</span> 地方運輸局の構成</h2>
+  <table class="styled-table">
+    <thead><tr><th>担当</th><th>業務内容</th></tr></thead>
+    <tbody>
+      <tr><td><strong>監理課</strong></td><td>小型船舶の検査・登録</td></tr>
+      <tr><td><strong>船舶安全・海技関係課</strong></td><td>大型船舶の検査、外国船舶の監督（PSC）、海技士国家試験</td></tr>
+      <tr><td><strong>船員労務官</strong></td><td>船長等の労務に関する監督</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>国土交通省 → 海事局 → 地方運輸局 → 海事事務所の階層構造</li>
+    <li>根拠法令は「法 ＞ 令 ＞ 省規則 ＞ 地方規則」のヒエラルキー</li>
+    <li>神戸運輸監理部は特別な位置づけ（地方規則で規定）</li>
+    <li>船舶産業課は船用品・造船施設を含む船舶の産業振興と再資源化解体を担当</li>
+    <li>海技試験官の設置は省規則で定められる</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"海事局の「設置・課・室」を定める根拠法令は？",options:["国土交通省組織令","国土交通省設置法","国土交通省組織規則","地方運輸局組織細則"],answer:1,explanation:"海事局の設置・課・室は「法」（国土交通省設置法）で定められています。最も重要な組織の設置は法律レベルで規定されます。"},
+    {q:"海技試験官の設置を定める根拠法令は？",options:["法（設置法）","令（組織令）","省規則（組織規則）","地方規則（組織細則）"],answer:2,explanation:"海技試験官の設置は「省規則」（国土交通省組織規則）で定められています。"},
+    {q:"船舶産業課の所掌事務に含まれるものは？",options:["船員の資格試験","船舶の再資源化解体","港湾の管理","外国船舶の監督"],answer:1,explanation:"船舶産業課は船舶（船用品及び造船施設を含む）の産業振興と、船舶の再資源化解体（シップリサイクル）を所掌しています。"}
+  ]
+},
+
+// ---------- LESSON 5: 船舶法 ----------
+{
+  id:5, phase:1,
+  title:'船舶法',
+  titleReading:'せんぱくほう',
+  subtitle:'船の「戸籍」を学ぶ',
+  objectives:['日本船舶の要件を列挙できる','登記と登録の違い・流れを説明できる','手数料の納付方法を区別できる'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">人に戸籍があるように、船にも「国籍」があります。日本の国旗（日の丸）を掲げて航行できる船は「日本船舶」だけ。では、どうすれば船は日本国籍を取得できるのでしょうか？</div>
+  <p>船舶法は船舶の国籍を定める法律です。海事代理士の実務で最も重要な法律の一つです。</p>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 日本船舶の要件</h2>
+  <p>以下のいずれかに該当する船舶が「日本船舶」となります：</p>
+  <ul style="margin-left:20px;font-size:0.85rem;">
+    <li>日本国民の所有する船舶</li>
+    <li>日本の法令により設立された会社で、<strong>代表者全員</strong>が日本国民である会社の所有する船舶</li>
+    <li>日本の法令により設立された法人（上記以外）で、代表者全員＋業務執行役員の2/3以上が日本国民</li>
+  </ul>
+
+  <div class="info-box tip">
+    <div class="box-title">日本船舶の特権</div>
+    <p>日本船舶は<strong>日の丸（日本国旗）を掲げる権利</strong>があり、不開港場への寄港や日本沿岸での貨物・旅客輸送（カボタージュ）ができます。</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> 登記と登録の流れ</h2>
+  <p>原則として、<span style="color:var(--danger);font-weight:bold">登記（法務局）</span> → <span style="color:var(--info);font-weight:bold">登録（<span class="key-term" data-term="管海官庁">管海官庁</span>）</span> → <span class="key-term" data-term="船舶国籍証書">船舶国籍証書</span>の交付、の順番です。</p>
+
+  <h3>新規建造による取得の流れ</h3>
+  <div class="flowchart">
+    <div class="flow-step blue">1. <span class="key-term" data-term="船籍港">船籍港</span>を定める</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step blue">2. 管海官庁に<span class="key-term" data-term="総トン数">総トン数</span>の<span class="key-term" data-term="測度">測度</span>を申請</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step red">3. 登記所（法務局）に所有権の保存登記を申請</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step blue">4. 管海官庁に船舶国籍証書の交付を申請</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step green">5. 船舶国籍証書の謄本を船内に備える</div>
+  </div>
+
+  <h3>譲渡による取得の流れ</h3>
+  <div class="flowchart">
+    <div class="flow-step red">1. 登記所に所有権移転登記（＋船籍港変更登記）を申請</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step blue">2. 管海官庁に変更登録を申請（船舶国籍証書の書換えも同時申請）</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step blue">3. 書換後、遅滞なく旧船舶国籍証書を返還</div>
+  </div>
+
+  <div class="info-box note">
+    <div class="box-title">例外パターン：総トン数の変更（改測）</div>
+    <p>改造等で総トン数が変わった場合は、<strong>管海官庁からスタート</strong>する点が他と異なります。管海官庁で改測→登記所で変更登記→管海官庁で変更登録→書換え、の順です。</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> 手数料の納付方法（3パターン）</h2>
+  <p>手数料の納付方法は3パターンあり、<strong>どの方法がどの手続きに対応するか</strong>が試験で問われます。</p>
+
+  <table class="styled-table">
+    <thead><tr><th>納付方法</th><th>対象となる手続き</th></tr></thead>
+    <tbody>
+      <tr><td><strong>収入印紙を貼付</strong></td><td>総トン数の改測、船舶国籍証書の受付、船籍簿の変更登録、船舶国籍証書の書換え</td></tr>
+      <tr><td><strong>「手数料納付書」に収入印紙を貼付</strong></td><td>総トン数の測度、船舶国籍証書の交付、船籍簿の登録、船舶国籍証書の書換え</td></tr>
+      <tr><td><strong>「申請書」に収入印紙を貼付</strong></td><td>船舶国籍証書の謄本交付、総トン数計算書の謄本交付</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">4</span> 船体に標示すべき事項</h2>
+  <p>日本船舶は船体の外部に以下の事項を標示しなければなりません。</p>
+
+  <div class="ship-diagram">
+    <svg viewBox="0 0 500 200" class="ship-svg" style="max-width:500px">
+      <defs>
+        <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3498db" stop-opacity="0.3"/><stop offset="100%" stop-color="#2980b9" stop-opacity="0.5"/></linearGradient>
+      </defs>
+      <rect x="0" y="140" width="500" height="60" fill="url(#seaGrad)" rx="4"/>
+      <!-- Ship hull -->
+      <path d="M60,140 L80,80 L400,80 L420,100 L440,140 Z" fill="#5d6d7e" stroke="#2c3e50" stroke-width="2"/>
+      <!-- Superstructure -->
+      <rect x="280" y="40" width="100" height="40" fill="#7f8c8d" stroke="#2c3e50" stroke-width="1.5" rx="2"/>
+      <rect x="300" y="20" width="60" height="25" fill="#95a5a6" stroke="#2c3e50" stroke-width="1" rx="2"/>
+      <!-- Bow label -->
+      <text x="100" y="70" font-size="11" fill="#e74c3c" font-weight="bold" font-family="sans-serif">船首側</text>
+      <text x="90" y="120" font-size="10" fill="white" font-family="sans-serif">船名</text>
+      <text x="90" y="138" font-size="9" fill="#f1c40f" font-family="sans-serif">喫水尺度</text>
+      <!-- Side label -->
+      <text x="200" y="138" font-size="9" fill="#f1c40f" font-family="sans-serif">満載喫水線</text>
+      <line x1="170" y1="130" x2="270" y2="130" stroke="#f1c40f" stroke-width="2" stroke-dasharray="5,3"/>
+      <!-- Stern label -->
+      <text x="370" y="70" font-size="11" fill="#e74c3c" font-weight="bold" font-family="sans-serif">船尾側</text>
+      <text x="380" y="120" font-size="10" fill="white" font-family="sans-serif">船名</text>
+      <text x="380" y="138" font-size="10" fill="white" font-family="sans-serif">船籍港</text>
+    </svg>
+    <p style="font-size:0.8rem;color:var(--text-light);margin-top:10px;">船首に：船名、喫水尺度、満載喫水線 ／ 船尾に：船名、船籍港</p>
+  </div>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>日本船舶 = 日本国民 or 代表者全員が日本国民の会社が所有する船舶</li>
+    <li>流れの基本：登記（法務局）→ 登録（管海官庁）→ 船舶国籍証書交付</li>
+    <li>新規建造は「測度→保存登記→国籍証書交付」の順</li>
+    <li>総トン数の変更（改測）は例外的に管海官庁からスタート</li>
+    <li>手数料納付は3パターン：収入印紙貼付 / 手数料納付書 / 申請書に貼付</li>
+    <li>船首に船名・喫水尺度・満載喫水線、船尾に船名・船籍港を標示</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"日本船舶の登記・登録の原則的な順番として正しいものは？",options:["登録 → 登記 → 国籍証書交付","登記 → 国籍証書交付 → 登録","登記 → 登録 → 国籍証書交付","国籍証書交付 → 登記 → 登録"],answer:2,explanation:"原則として「登記（法務局）→ 登録（管海官庁）→ 船舶国籍証書の交付」の順番です。"},
+    {q:"船体の船尾に標示すべき事項は？",options:["船名と喫水尺度","船名と満載喫水線","船名と船籍港","船名と総トン数"],answer:2,explanation:"船尾には「船名」と「船籍港」を標示します。船首には船名、喫水尺度、満載喫水線を標示します。"},
+    {q:"総トン数の測度の手数料はどのように納付するか？",options:["収入印紙を申請書に貼付","手数料納付書に収入印紙を貼付","現金で納付","銀行振込"],answer:1,explanation:"総トン数の測度の手数料は「手数料納付書」に収入印紙を貼付して納付します。"}
+  ]
+},
+
+// ---------- LESSON 6: 内航海運業法 ----------
+{
+  id:6, phase:1,
+  title:'内航海運業法',
+  titleReading:'ないこうかいうんぎょうほう',
+  subtitle:'国内海上輸送のルール',
+  objectives:['内航海運業の定義を理解する','登録と届出の区別基準を説明できる','届出事項と期限を把握する'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">宿毛港から大阪港へ石油製品を運ぶタンカー。これは「<span class="key-term" data-term="内航海運業">内航海運業</span>」です。日本の港と港を結ぶ海上物流を支えるこの事業には、安全確保のためのルールがあります。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 内航海運業とは</h2>
+  <p>日本国内の各港間において、船舶により物品の運送をする事業を「内航海運業」といいます。</p>
+  <div class="def-list">
+    <div class="def-item"><span class="def-label">内航海運業</span><span>船舶により物品を運送する事業（船主・オペレータ）</span></div>
+    <div class="def-item"><span class="def-label">内航運送取扱業</span><span>他人の需要に応じ、運送の取次ぎ・代弁等をする事業</span></div>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> <span class="key-term" data-term="登録">登録</span>と<span class="key-term" data-term="届出">届出</span>の区別</h2>
+  <p>事業開始にあたって必要な手続きは<strong>船舶のサイズ</strong>で変わります！</p>
+
+  <table class="styled-table">
+    <thead><tr><th>条件</th><th>手続き</th></tr></thead>
+    <tbody>
+      <tr><td>総トン数<strong>100トン以上</strong> 又は 長さ<strong>30m以上</strong></td><td><span class="badge registration">登録</span>（事業開始時）</td></tr>
+      <tr><td>総トン数<strong>100トン未満</strong> かつ 長さ<strong>30m未満</strong></td><td><span class="badge notification">届出</span>（30日以内）</td></tr>
+      <tr><td>内航運送<strong>取扱業</strong></td><td><span class="badge notification">届出</span>（30日以内）</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box mnemonic">
+    <div class="box-title">覚え方</div>
+    <p>「<strong>100トン or 30m</strong>」がボーダーライン。大きい船は影響が大きい→登録（厳しい方）。小さい船・取扱業は届出でOK。</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> 届出事項と期限</h2>
+  <table class="styled-table">
+    <thead><tr><th>届出事項</th><th>期限</th></tr></thead>
+    <tbody>
+      <tr><td>船舶の使用休止の制定・変更</td><td>届出</td></tr>
+      <tr><td>新船・使用船の変更</td><td><strong>15日以内</strong>に届出</td></tr>
+      <tr><td>安全管理規程</td><td>届出</td></tr>
+      <tr><td>運送約款の設定・料金</td><td><strong>遅滞なく</strong>届出</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>内航海運業 = 日本国内の港間で船舶により物品を運送する事業</li>
+    <li>100トン以上 or 30m以上 → 登録、100トン未満 かつ 30m未満 → 届出</li>
+    <li>内航運送取扱業は届出（30日以内）</li>
+    <li>新船・使用船の変更は15日以内に届出</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"総トン数80トン、長さ35mの船舶で内航海運業を始める場合の手続きは？",options:["届出","登録","許可","認可"],answer:1,explanation:"総トン数100トン未満ですが、長さが30m以上なので「登録」が必要です。「100トン以上 又は 30m以上」のいずれかに該当すれば登録です。"},
+    {q:"内航運送取扱業を開始する場合の手続きは？",options:["登録","届出","許可","認可"],answer:1,explanation:"内航運送取扱業の開始は「届出」（30日以内）です。"},
+    {q:"内航海運業で新船を使用する場合の届出期限は？",options:["遅滞なく","15日以内","30日以内","60日以内"],answer:1,explanation:"新船・使用船の変更は「15日以内」に届出が必要です。"}
+  ]
+},
+
+// ---------- LESSON 7: 船員法① ----------
+{
+  id:7, phase:2,
+  title:'船員法① 基礎編',
+  titleReading:'せんいんほう きそへん',
+  subtitle:'船員の労働を守る法律',
+  objectives:['雇入契約の仕組みを理解する','雇入契約の解除事由を区別できる','船長の権限と懲戒について説明できる'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">陸上の労働者には労働基準法がありますが、船員の労働環境は陸上とは全く異なります。何日も海の上で過ごし、閉鎖的な空間で働く船員には、特別なルールが必要です。それが「船員法」── 海の労働基準法です。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> <span class="key-term" data-term="雇入契約">雇入契約</span></h2>
+  <p>船員と船舶所有者の間で締結する労働契約を「雇入契約」と呼びます。陸上の雇用契約とは異なり、国への届出が義務付けられています。</p>
+
+  <div class="flowchart">
+    <div class="flow-step blue">船員と船舶所有者が雇入契約を締結</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step green">地方運輸局長に届出</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step orange"><span class="key-term" data-term="船員手帳">船員手帳</span>に契約内容を記載</div>
+  </div>
+
+  <div class="info-box note">
+    <div class="box-title">なぜ届出が必要？</div>
+    <p>海の上では労働基準監督署のような監督機関がすぐには来られません。そのため、契約時点で行政に届け出ることで、船員の権利を保護しています。</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> 雇入契約の解除事由</h2>
+  <table class="styled-table">
+    <thead><tr><th>誰から</th><th>解除事由</th></tr></thead>
+    <tbody>
+      <tr><td><strong>船舶所有者から</strong></td><td>・船員が職務に不適任であるとき<br>・船員が職務を怠ったとき</td></tr>
+      <tr><td><strong>船員から</strong></td><td>・雇入契約により定められた労働条件と著しく相違するとき</td></tr>
+      <tr><td><strong>双方から</strong></td><td>・24時間以上の期間を定めて書面で解除の申入れをし、その期間が終了したとき<br>・船員が負傷又は疾病のため職務に堪えないとき</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box tip">
+    <div class="box-title">試験のポイント</div>
+    <p>「24時間以上の予告期間を書面で」「双方から解除できるケース」は頻出です。特に「負傷・疾病で職務に堪えない」は双方からの解除事由であることに注意。</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> 船長の権限と懲戒</h2>
+  <p>船長は「船の最高責任者」です。海の上では警察も裁判所もないため、船長に特別な権限が与えられています。</p>
+
+  <div class="two-col">
+    <div class="col-card">
+      <h4>船長の権限</h4>
+      <ul>
+        <li>在船者に対する<strong>指揮命令権</strong></li>
+        <li>航海の安全確保のための措置</li>
+        <li>船内の秩序維持</li>
+        <li>海員名簿の備置き義務</li>
+      </ul>
+    </div>
+    <div class="col-card">
+      <h4>懲戒の種類</h4>
+      <ul>
+        <li><strong>上陸禁止</strong>：10日以内</li>
+        <li><strong>戒告</strong>：文書による注意</li>
+        <li>※ 減給や降格は懲戒として認められない</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>雇入契約は船員と船舶所有者の労働契約。地方運輸局長への届出が必要</li>
+    <li>解除は「船舶所有者から」「船員から」「双方から」の3パターン</li>
+    <li>24時間以上の予告期間＋書面で双方から解除可能</li>
+    <li>船長は在船者に対する指揮命令権を持つ</li>
+    <li>懲戒は上陸禁止（10日以内）と戒告（文書）の2種類のみ</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"雇入契約の締結後、届出先はどこか？",options:["管海官庁","地方運輸局長","国土交通大臣","船籍港の市区町村"],answer:1,explanation:"雇入契約の届出先は「地方運輸局長」です。"},
+    {q:"船長が行える懲戒で正しいものは？",options:["減給処分","上陸禁止（10日以内）","降格処分","罰金"],answer:1,explanation:"船長の懲戒は「上陸禁止（10日以内）」と「戒告（文書）」の2種類です。減給・降格は認められていません。"},
+    {q:"雇入契約の解除において、双方から解除できるケースは？",options:["船員が職務に不適任","労働条件が著しく相違","24時間以上の予告期間を定めた書面による申入れ","船員が職務を怠った"],answer:2,explanation:"24時間以上の予告期間を定めた書面での申入れは、船舶所有者・船員の双方から行える解除事由です。"}
+  ]
+},
+
+// ---------- LESSON 8: 船員法② ----------
+{
+  id:8, phase:2,
+  title:'船員法② 労働条件編',
+  titleReading:'せんいんほう ろうどうじょうけんへん',
+  subtitle:'船員の働き方と災害補償',
+  objectives:['船員の労働時間制度を理解する','有給休暇の仕組みを知る','災害補償の種類を列挙できる'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">船員は24時間体制で船を動かします。4時間当直、8時間休息のシフト。港に着いても荷役作業。そんな船員の働き方を守るルールを学びましょう。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 労働時間</h2>
+  <div class="def-list">
+    <div class="def-item"><span class="def-label">原則</span><span>1日<strong>8時間</strong>、1週間<strong>40時間</strong></span></div>
+    <div class="def-item"><span class="def-label">航海当直</span><span>4時間当直・8時間休息の<strong>三直制</strong>（3交代制）</span></div>
+    <div class="def-item"><span class="def-label">時間外労働</span><span>上限あり。割増賃金の支払いが必要</span></div>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> 有給休暇と給料</h2>
+  <div class="two-col">
+    <div class="col-card">
+      <h4>有給休暇</h4>
+      <ul>
+        <li>連続<strong>6ヶ月</strong>の乗船で権利発生</li>
+        <li>乗船期間1ヶ月につき<strong>2.5日</strong>が基本</li>
+        <li>国際航海従事船員は加算あり</li>
+      </ul>
+    </div>
+    <div class="col-card">
+      <h4>給料の構成</h4>
+      <ul>
+        <li><strong>基本給</strong></li>
+        <li><strong>航海日当</strong></li>
+        <li><strong>食料費</strong>（現物支給または手当）</li>
+        <li>時間外手当</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> 災害補償</h2>
+  <p>船員が<strong>職務上</strong>の原因で負傷・疾病にかかった場合、船舶所有者は補償する義務があります。</p>
+
+  <table class="styled-table">
+    <thead><tr><th>補償の種類</th><th>内容</th><th>要件</th></tr></thead>
+    <tbody>
+      <tr><td><strong>療養補償</strong></td><td>治療費を負担</td><td>職務上の負傷・疾病</td></tr>
+      <tr><td><strong>傷病手当</strong></td><td>療養中の生活費</td><td>療養のため勤務できない場合</td></tr>
+      <tr><td><strong>障害手当</strong></td><td>後遺障害に対する補償</td><td>障害が残った場合</td></tr>
+      <tr><td><strong>遺族手当</strong></td><td>遺族への補償</td><td>死亡した場合</td></tr>
+      <tr><td><strong>葬祭料</strong></td><td>葬儀費用</td><td>死亡した場合</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">4</span> 未成年・女性船員の保護</h2>
+  <div class="info-box warning">
+    <div class="box-title">特別な保護規定</div>
+    <p><strong>未成年者</strong>（18歳未満）：深夜業の制限、危険有害業務の禁止<br>
+    <strong>女性船員</strong>：妊産婦の保護（軽易な作業への転換、産前産後休暇）<br>
+    ※ 船員法では陸上の労働基準法とは異なる独自の保護規定があります。</p>
+  </div>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>労働時間：1日8時間、週40時間。航海当直は三直制（4時間交代）</li>
+    <li>有給休暇：連続6ヶ月の乗船で権利発生</li>
+    <li>災害補償：療養・傷病手当・障害手当・遺族手当・葬祭料の5種類</li>
+    <li>未成年・女性船員には特別な保護規定あり</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"船員の有給休暇の権利が発生するのは連続何ヶ月の乗船後か？",options:["3ヶ月","6ヶ月","12ヶ月","24ヶ月"],answer:1,explanation:"連続6ヶ月の乗船で有給休暇の権利が発生します。"},
+    {q:"船員の災害補償に含まれないものは？",options:["療養補償","傷病手当","退職金","葬祭料"],answer:2,explanation:"退職金は災害補償の種類には含まれません。災害補償は療養補償・傷病手当・障害手当・遺族手当・葬祭料の5つです。"},
+    {q:"船員の航海当直制度で正しいものは？",options:["2時間当直・4時間休息","4時間当直・8時間休息","6時間当直・6時間休息","8時間当直・8時間休息"],answer:1,explanation:"航海当直は「4時間当直・8時間休息」の三直制（3交代制）です。"}
+  ]
+},
+
+// ---------- LESSON 9: 船舶安全法 ----------
+{
+  id:9, phase:2,
+  title:'船舶安全法',
+  titleReading:'せんぱくあんぜんほう',
+  subtitle:'船の安全を確保する検査制度',
+  objectives:['船舶検査の5種類を区別できる','船舶検査証書の意義を理解する','満載喫水線の役割を説明できる'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">自動車に車検があるように、船舶にも定期的な検査があります。船の検査は人命と海洋環境に直結するため、自動車よりもはるかに厳格です。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 船舶検査の5種類</h2>
+  <table class="styled-table">
+    <thead><tr><th>検査の種類</th><th>時期・目的</th><th>周期</th></tr></thead>
+    <tbody>
+      <tr><td><strong>初検査</strong></td><td>新造船の最初の検査</td><td>1回のみ</td></tr>
+      <tr><td><strong><span class="key-term" data-term="定期検査">定期検査</span></strong></td><td>総合的な検査</td><td><strong>5年</strong>ごと</td></tr>
+      <tr><td><strong>中間検査</strong></td><td>定期検査と定期検査の間</td><td>約<strong>2.5年</strong>ごと</td></tr>
+      <tr><td><strong>臨時検査</strong></td><td>改造・修理後、事故後など</td><td>必要時</td></tr>
+      <tr><td><strong>臨時航行検査</strong></td><td>検査証書のない船舶が臨時に航行するとき</td><td>必要時</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box mnemonic">
+    <div class="box-title">覚え方</div>
+    <p>「<strong>初・定・中・臨・臨航</strong>」の5つ。定期＝5年、中間＝その間（2.5年）、臨時と臨時航行は「イレギュラー時」。</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> <span class="key-term" data-term="船舶検査証書">船舶検査証書</span></h2>
+  <p>定期検査に合格すると<strong>船舶検査証書</strong>が交付されます。有効期間は<strong>5年</strong>。この証書がないと船舶は航行できません。</p>
+
+  <div class="flowchart">
+    <div class="flow-step blue">定期検査を受検</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step green">合格 → 船舶検査証書の交付（有効期間5年）</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step orange">2.5年目に中間検査</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step blue">5年後に次の定期検査</div>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> <span class="key-term" data-term="満載喫水線">満載喫水線</span></h2>
+  <p>船が安全に航行できる最大積載量の限度を示す線です。この線より下まで船体が沈むほど荷物を積んではいけません。</p>
+
+  <div class="info-box note">
+    <div class="box-title">季節と海域で変わる！</div>
+    <p>満載喫水線は季節や航行海域によって異なります。冬の北大西洋は波が高いため、夏より厳しい（浅い）制限値となります。</p>
+  </div>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>検査は5種類：初検査・定期検査・中間検査・臨時検査・臨時航行検査</li>
+    <li>定期検査は5年ごと、中間検査は約2.5年ごと</li>
+    <li>船舶検査証書の有効期間は5年。この証書なしでは航行不可</li>
+    <li>満載喫水線は安全な最大積載量を示す。季節・海域で異なる</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"定期検査の周期は？",options:["1年ごと","3年ごと","5年ごと","10年ごと"],answer:2,explanation:"定期検査は5年ごとに行われます。船舶検査証書の有効期間も5年です。"},
+    {q:"中間検査の位置づけとして正しいものは？",options:["初検査の後すぐに行う","定期検査と定期検査の間に行う","臨時検査の一種","船舶検査証書の更新時に行う"],answer:1,explanation:"中間検査は定期検査と定期検査の間（約2.5年ごと）に行う検査です。"},
+    {q:"船舶検査証書がない船舶が臨時に航行する場合に受ける検査は？",options:["初検査","臨時検査","臨時航行検査","中間検査"],answer:2,explanation:"検査証書のない船舶が臨時に航行する場合は「臨時航行検査」を受けます。"}
+  ]
+},
+
+// ---------- LESSON 10: 船舶職員法 ----------
+{
+  id:10, phase:2,
+  title:'船舶職員及び小型船舶操縦者法',
+  titleReading:'せんぱくしょくいんほう',
+  subtitle:'船を操る人の資格制度',
+  objectives:['海技免許の種類を列挙できる','乗組み基準の考え方を理解する','小型船舶操縦免許の区分を知る'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">自動車を運転するのに免許が必要なように、船舶を操縦するにも資格が必要です。船の大きさや航行区域に応じて、どのレベルの資格が求められるかが「<span class="key-term" data-term="乗組み基準">乗組み基準</span>」です。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> <span class="key-term" data-term="海技免許">海技免許</span>の種類</h2>
+  <table class="styled-table">
+    <thead><tr><th>区分</th><th>等級</th><th>担当業務</th></tr></thead>
+    <tbody>
+      <tr><td><strong>海技士（航海）</strong></td><td>1級〜6級</td><td>操船、航路計画、安全管理</td></tr>
+      <tr><td><strong>海技士（機関）</strong></td><td>1級〜6級</td><td>エンジン、機械設備の運転・管理</td></tr>
+      <tr><td><strong>海技士（通信）</strong></td><td>1級〜3級</td><td>無線通信</td></tr>
+      <tr><td><strong>海技士（電子通信）</strong></td><td>1級〜4級</td><td>電子通信機器の操作</td></tr>
+    </tbody>
+  </table>
+  <p>数字が小さいほど上級です（1級が最上位）。</p>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> 乗組み基準</h2>
+  <p>船舶の<strong>大きさ</strong>・<strong>種類</strong>・<strong>航行区域</strong>に応じて、配置すべき海技免許の種類と人数が決まっています。</p>
+  <div class="info-box note">
+    <div class="box-title">具体例</div>
+    <p>総トン数5,000トンの貨物船が遠洋を航行する場合 → 1級海技士（航海）が必要<br>
+    総トン数200トンの内航タンカーが沿海区域を航行する場合 → より低い等級でOK</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> 小型船舶操縦免許</h2>
+  <p>総トン数20トン未満の船舶（プレジャーボート等）の操縦には「小型船舶操縦免許」が必要です。</p>
+  <table class="styled-table">
+    <thead><tr><th>免許</th><th>操縦できる範囲</th></tr></thead>
+    <tbody>
+      <tr><td><strong>1級</strong></td><td>全ての海域</td></tr>
+      <tr><td><strong>2級</strong></td><td>平水区域及び海岸から5海里以内</td></tr>
+      <tr><td><strong>特殊</strong></td><td>水上オートバイ（ジェットスキー）</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>海技免許は航海・機関・通信・電子通信の4区分</li>
+    <li>1級が最上位。船の大きさ・航行区域で必要な等級が変わる</li>
+    <li>乗組み基準で船舶ごとに必要な免許の種類・人数が決まる</li>
+    <li>小型船舶操縦免許は1級・2級・特殊の3区分</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"海技士（航海）の最上位の等級は？",options:["6級","3級","1級","特級"],answer:2,explanation:"海技士の等級は数字が小さいほど上位です。1級が最上位です。"},
+    {q:"小型船舶操縦免許の「特殊」は何を操縦するための免許か？",options:["漁船","水上オートバイ","ヨット","帆船"],answer:1,explanation:"小型船舶操縦免許の「特殊」は水上オートバイ（ジェットスキー）を操縦するための免許です。"},
+    {q:"船舶に配置すべき海技免許の種類と人数を定めた基準を何と呼ぶか？",options:["定員基準","乗組み基準","資格基準","配乗基準"],answer:1,explanation:"船舶の大きさ・種類・航行区域に応じて配置すべき海技免許を定めた基準を「乗組み基準」と呼びます。"}
+  ]
+},
+
+// ---------- LESSON 11: 海上運送法 ----------
+{
+  id:11, phase:2,
+  title:'海上運送法',
+  titleReading:'かいじょううんそうほう',
+  subtitle:'海上運送事業の規制',
+  objectives:['事業の種類と開始手続きの違いを区別できる','許可・認可・登録・届出の違いを理解する','変更時の手続きを整理できる'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">フェリーに乗って旅行する人、宅配便で荷物を送る荷主。海上運送は多くの人の生活に関わっています。旅客を運ぶ事業は安全が最重要なので規制が厳しく、貨物だけなら比較的緩やかです。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 事業の種類と開始手続き</h2>
+  <p>「<span class="key-term" data-term="許可">許可</span>」「<span class="key-term" data-term="登録">登録</span>」「<span class="key-term" data-term="届出">届出</span>」の使い分けが重要です。</p>
+
+  <table class="styled-table">
+    <thead><tr><th>事業の種類</th><th>開始時の手続き</th></tr></thead>
+    <tbody>
+      <tr><td>一般旅客定期航路事業</td><td><span class="badge permit">許可</span></td></tr>
+      <tr><td>旅客不定期航路事業</td><td><span class="badge permit">許可</span></td></tr>
+      <tr><td>自動車航送貨物定期航路事業</td><td><span class="badge registration">登録</span></td></tr>
+      <tr><td>貨物定期航路事業</td><td><span class="badge notification">届出</span></td></tr>
+      <tr><td>遊覧旅客不定期航路事業</td><td><span class="badge notification">届出</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box mnemonic">
+    <div class="box-title">覚え方のコツ</div>
+    <p><strong>「旅客」が絡む → 厳しい（許可）</strong><br>
+    <strong>「貨物のみ」→ 緩い（届出）</strong><br>
+    <strong>自動車航送 → 登録（中間）</strong><br>
+    遊覧旅客は短距離・低リスクなので「届出」で例外。</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> 変更時の手続き</h2>
+  <table class="styled-table">
+    <thead><tr><th>変更事項</th><th>手続き</th></tr></thead>
+    <tbody>
+      <tr><td>運賃の上限の制定・変更</td><td><span class="badge approval">認可</span></td></tr>
+      <tr><td>船舶運航計画の変更</td><td><span class="badge approval">認可</span></td></tr>
+      <tr><td>事業計画の変更</td><td><span class="badge approval">認可</span></td></tr>
+      <tr><td>譲渡/譲受/承継/相続</td><td><span class="badge approval">認可</span></td></tr>
+      <tr><td>運送約款の制定・変更</td><td><span class="badge approval">認可</span></td></tr>
+      <tr><td>料金の制定・変更</td><td><span class="badge notification">届出</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box tip">
+    <div class="box-title">「認可」と「届出」の見分け方</div>
+    <p><strong>安全や利用者保護に直結する変更 → <span class="key-term" data-term="認可">認可</span></strong>（行政の判断が必要）<br>
+    <strong>単なる情報提供レベル → 届出</strong>（行政に知らせるだけ）<br>
+    「料金」は上限でなければ届出でOK。「運賃の上限」は認可。</p>
+  </div>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>旅客事業＝許可（最も厳しい）、貨物事業＝届出（緩い）</li>
+    <li>自動車航送貨物定期航路＝登録（中間的規制）</li>
+    <li>安全・利用者保護に関わる変更＝認可、情報提供レベル＝届出</li>
+    <li>運賃の上限の変更＝認可、料金の変更＝届出</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"一般旅客定期航路事業の開始に必要な手続きは？",options:["届出","登録","認可","許可"],answer:3,explanation:"旅客を定期的に運送する事業は最も厳しい規制である「許可」が必要です。"},
+    {q:"運賃の上限の変更に必要な手続きは？",options:["届出","登録","認可","許可"],answer:2,explanation:"運賃の上限の制定・変更には「認可」が必要です。利用者保護に直結するためです。"},
+    {q:"貨物定期航路事業の開始に必要な手続きは？",options:["許可","認可","登録","届出"],answer:3,explanation:"貨物のみの定期航路事業は「届出」で開始できます。旅客に比べてリスクが低いためです。"}
+  ]
+},
+
+// ---------- LESSON 12: 造船法・トン数法 ----------
+{
+  id:12, phase:2,
+  title:'造船法・トン数法',
+  titleReading:'ぞうせんほう・トンすうほう',
+  subtitle:'船を造る・船の大きさを測る',
+  objectives:['造船法の許可・届出・報告の区別ができる','総トン数と純トン数の違いを説明できる'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">船を造るにも法律の規制があります。大規模な造船施設の新設には許可が必要。また、船の「大きさ」を法律的にどう測るかがトン数法です。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 造船法の手続き区分</h2>
+  <table class="styled-table">
+    <thead><tr><th>事項</th><th>手続き</th><th>時期</th></tr></thead>
+    <tbody>
+      <tr><td>造船施設の新設・増設</td><td><span class="badge permit">許可</span></td><td>しようとするとき</td></tr>
+      <tr><td>タンク・可搬式タンク（5万トン未満）の新設</td><td><span class="badge notification">届出</span></td><td>-</td></tr>
+      <tr><td>設備の新設・増設・改造</td><td><span class="badge notification">届出</span></td><td>工事完了の<strong>7日以内</strong></td></tr>
+      <tr><td>造船事業の開始・休止・廃止</td><td><span class="badge notification">届出</span></td><td>-</td></tr>
+      <tr><td>設備・生産の状況</td><td><span class="badge report">報告</span></td><td>-</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box mnemonic">
+    <div class="box-title">覚え方</div>
+    <p>「<strong>施設の新設・増設</strong>」だけが<span class="badge permit">許可</span>。あとは全部<span class="badge notification">届出</span>か<span class="badge report">報告</span>。<br>
+    設備の工事完了は「<strong>7日以内</strong>」がポイント。</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> トン数法</h2>
+  <div class="two-col">
+    <div class="col-card">
+      <h4><span class="key-term" data-term="総トン数">総トン数</span></h4>
+      <ul>
+        <li>船舶の<strong>大きさ</strong>の指標</li>
+        <li>船舶の閉囲場所の<strong>容積</strong>に基づく</li>
+        <li>重さではない！</li>
+        <li>各種法律の適用基準に使用</li>
+      </ul>
+    </div>
+    <div class="col-card">
+      <h4>純トン数</h4>
+      <ul>
+        <li>貨物を<strong>積載できるスペース</strong></li>
+        <li>総トン数から機関室等を除いた部分</li>
+        <li>港湾使用料等の算定に使用</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-box warning">
+    <div class="box-title">よくある間違い</div>
+    <p>「トン数」と聞くと重さを思い浮かべますが、総トン数は<strong>容積</strong>ベースの数値です。船の重さを表すのは「排水トン数」です。</p>
+  </div>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>造船施設の新設・増設のみ「許可」。その他は届出または報告</li>
+    <li>設備工事完了は7日以内に届出</li>
+    <li>総トン数＝容積ベースの船の大きさ指標（重さではない）</li>
+    <li>純トン数＝貨物積載スペースの指標</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"造船施設の新設に必要な手続きは？",options:["届出","報告","許可","認可"],answer:2,explanation:"造船施設の新設・増設には「許可」が必要です。造船法で唯一の許可事項です。"},
+    {q:"総トン数は何に基づいて算出されるか？",options:["船舶の重さ","船舶の長さ","船舶の閉囲場所の容積","船舶の排水量"],answer:2,explanation:"総トン数は船舶の閉囲場所の容積に基づいて算出されます。重さではありません。"},
+    {q:"設備の新設・増設・改造後の届出期限は？",options:["3日以内","7日以内","15日以内","30日以内"],answer:1,explanation:"設備の新設・増設・改造は、工事完了の7日以内に届出が必要です。"}
+  ]
+},
+
+// ---------- LESSON 13: 海上交通安全法① ----------
+{
+  id:13, phase:3,
+  title:'海上交通安全法① 概要・航路',
+  titleReading:'かいじょうこうつうあんぜんほう がいよう',
+  subtitle:'海の交通ルール・11の航路',
+  objectives:['海上交通安全法の適用海域を知る','11の航路の名称と位置を覚える','航路航行義務を理解する'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">陸上に道路交通法があるように、海にも「交通法規」があります。特に船舶が混み合う東京湾・伊勢湾・瀬戸内海では、衝突事故を防ぐための厳格なルールが定められています。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 適用海域</h2>
+  <p>海上交通安全法が適用されるのは、船舶が特に集中する<strong>ふくそう海域</strong>です：</p>
+  <ul style="margin-left:20px;font-size:0.85rem;">
+    <li><strong>東京湾</strong></li>
+    <li><strong>伊勢湾</strong></li>
+    <li><strong>瀬戸内海</strong></li>
+  </ul>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> 11の航路</h2>
+  <p>海上交通安全法では、以下の<strong>11の航路</strong>が定められています。</p>
+
+  <div class="route-map">
+    <h3 style="font-family:var(--font-heading);margin-bottom:12px;font-size:0.95rem;">全11航路一覧</h3>
+    <div class="route-list">
+      <div class="route-item"><span class="num">1</span> 浦賀水道航路（東京湾入口）</div>
+      <div class="route-item"><span class="num">2</span> 中ノ瀬航路（東京湾内）</div>
+      <div class="route-item"><span class="num">3</span> 伊良湖水道航路（伊勢湾入口）</div>
+      <div class="route-item"><span class="num">4</span> 明石海峡航路（大阪湾⇔瀬戸内海）</div>
+      <div class="route-item"><span class="num">5</span> 備讃瀬戸東航路</div>
+      <div class="route-item"><span class="num">6</span> 宇高東航路</div>
+      <div class="route-item"><span class="num">7</span> 宇高西航路</div>
+      <div class="route-item"><span class="num">8</span> 備讃瀬戸北航路</div>
+      <div class="route-item"><span class="num">9</span> 備讃瀬戸南航路</div>
+      <div class="route-item"><span class="num">10</span> 水島航路</div>
+      <div class="route-item"><span class="num">11</span> 来島海峡航路</div>
+    </div>
+
+    <div class="info-box tip" style="margin-top:16px;">
+      <div class="box-title">地域で整理</div>
+      <p><strong>東京湾</strong>：浦賀水道、中ノ瀬（2航路）<br>
+      <strong>伊勢湾</strong>：伊良湖水道（1航路）<br>
+      <strong>瀬戸内海</strong>：明石海峡、備讃瀬戸東・北・南、宇高東・西、水島、来島海峡（8航路）</p>
+    </div>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> 航路航行義務</h2>
+  <p>一定以上の大きさの船舶は、航路が設定されている区域では<strong>航路を航行しなければなりません</strong>。航路外を自由に航行することはできません。</p>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>適用海域：東京湾・伊勢湾・瀬戸内海（ふくそう海域）</li>
+    <li>11の航路が法定されている</li>
+    <li>東京湾2、伊勢湾1、瀬戸内海8の航路</li>
+    <li>一定以上の船舶には航路航行義務がある</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"海上交通安全法が適用される海域はどれか？",options:["日本海","東京湾","太平洋","オホーツク海"],answer:1,explanation:"海上交通安全法は東京湾・伊勢湾・瀬戸内海のふくそう海域に適用されます。"},
+    {q:"海上交通安全法に定められた航路の総数は？",options:["5航路","8航路","11航路","15航路"],answer:2,explanation:"海上交通安全法では11の航路が定められています。"},
+    {q:"航路数が最も多い海域は？",options:["東京湾","伊勢湾","瀬戸内海","大阪湾"],answer:2,explanation:"瀬戸内海に8航路があり、最も多いです。東京湾2、伊勢湾1です。"}
+  ]
+},
+
+// ---------- LESSON 14: 海上交通安全法② ----------
+{
+  id:14, phase:3,
+  title:'海上交通安全法② 各航路の航法',
+  titleReading:'かいじょうこうつうあんぜんほう かくこうろ',
+  subtitle:'航路ごとの詳細ルール',
+  objectives:['浦賀水道・中ノ瀬航路のルールを覚える','来島海峡の「順西逆中」を理解する','巨大船の灯火を知る'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">各航路には固有のルールがあります。特に来島海峡の「順西逆中」は超頻出。一つずつ確実に覚えましょう。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 浦賀水道航路・中ノ瀬航路（法11条）</h2>
+  <div class="two-col">
+    <div class="col-card">
+      <h4>浦賀水道航路</h4>
+      <ul>
+        <li><strong>右側通航</strong></li>
+        <li>北航船・南航船いずれも通航可</li>
+        <li>北航船＝東京湾に入る船</li>
+        <li>南航船＝東京湾から出る船</li>
+      </ul>
+    </div>
+    <div class="col-card">
+      <h4>中ノ瀬航路</h4>
+      <ul>
+        <li><strong>北航船のみ</strong>通航可</li>
+        <li>南航船は通航不可</li>
+        <li>つまり「入ってくる船専用」</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> 伊良湖水道・明石海峡（法13〜15条）</h2>
+  <p><strong>伊良湖水道航路</strong>：右側通航。巨大船優先。<br>
+  <strong>明石海峡航路</strong>：右側通航。</p>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> 来島海峡航路（法20条） ★超重要★</h2>
+  <div class="info-box warning">
+    <div class="box-title">「順西逆中」（じゅんせいぎゃくちゅう）</div>
+    <p><strong>順潮</strong>（潮の流れに乗る）のとき → <strong>西水道</strong>を通る<br>
+    <strong>逆潮</strong>（潮の流れに逆らう）のとき → <strong>中水道</strong>を通る<br>
+    <strong>転流時</strong>（潮が変わる時） → 航行中の水道をそのまま続行</p>
+  </div>
+
+  <div class="info-box mnemonic">
+    <div class="box-title">覚え方</div>
+    <p>「<strong>順西逆中</strong>」（じゅんせいぎゃくちゅう）── 順は西、逆は中。4文字で覚える！</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">4</span> 巨大船・危険物積載船の灯火</h2>
+  <table class="styled-table">
+    <thead><tr><th>船種</th><th>灯火</th></tr></thead>
+    <tbody>
+      <tr><td><strong>巨大船</strong></td><td>前部・後部に<strong>3m以上</strong>の間隔の<strong>緑色</strong>全周灯火<strong>2個</strong></td></tr>
+      <tr><td><strong>危険物積載船</strong></td><td>最も見えやすい場所に<strong>1.5m以上</strong>の間隔の<strong>紅色</strong>全周灯火<strong>2個</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box mnemonic">
+    <div class="box-title">覚え方</div>
+    <p><strong>巨大＝緑（Green＝Giant）＝3m</strong><br>
+    <strong>危険＝紅（Red＝Risk）＝1.5m</strong></p>
+  </div>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>浦賀水道：右側通航（双方向）、中ノ瀬：北航船のみ</li>
+    <li>来島海峡：「順西逆中」── 順潮は西水道、逆潮は中水道</li>
+    <li>巨大船＝緑色灯火2個（3m間隔）、危険物積載船＝紅色灯火2個（1.5m間隔）</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"中ノ瀬航路を通航できるのは？",options:["南航船のみ","北航船のみ","双方向","巨大船のみ"],answer:1,explanation:"中ノ瀬航路は北航船（東京湾に入る船）のみが通航できます。"},
+    {q:"来島海峡で順潮時に通る水道は？",options:["東水道","西水道","中水道","北水道"],answer:1,explanation:"「順西逆中」── 順潮時は西水道を通ります。"},
+    {q:"巨大船が表示する灯火の色は？",options:["紅色","緑色","白色","黄色"],answer:1,explanation:"巨大船は緑色の全周灯火2個を表示します（3m以上の間隔）。危険物積載船は紅色です。"}
+  ]
+},
+
+// ---------- LESSON 15: 港則法 ----------
+{
+  id:15, phase:3,
+  title:'港則法',
+  titleReading:'こうそくほう',
+  subtitle:'港の中のルール',
+  objectives:['特定港と特定港以外の区別を理解する','許可と届出の区別ができる','第45条の準用規定を把握する'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">海上交通安全法が「海の道路交通法」なら、港則法は「港の駐車場ルール」のようなもの。港の中での船の動きを規制します。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> <span class="key-term" data-term="特定港">特定港</span>とは</h2>
+  <p>港則法では、喫水の深い大型船が出入りする港を「特定港」として政令で指定し、より厳しい規制を適用します。</p>
+  <div class="info-box note">
+    <div class="box-title">特定港の例</div>
+    <p>東京港、横浜港、名古屋港、大阪港、神戸港、北九州港など。</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> 許可と届出の区別</h2>
+  <div class="two-col">
+    <div class="col-card" style="border-top:4px solid var(--permit-red)">
+      <h4><span class="badge permit">許可</span>が必要</h4>
+      <ul>
+        <li>危険物の荷役・運搬・貯蔵</li>
+        <li>いかだの運行</li>
+        <li>港内での工事・作業</li>
+        <li>私設信号の設置</li>
+      </ul>
+    </div>
+    <div class="col-card" style="border-top:4px solid var(--notification-blue)">
+      <h4><span class="badge notification">届出</span>が必要</h4>
+      <ul>
+        <li>入港・出港</li>
+        <li>びょう泊（錨泊）</li>
+        <li>船舶の修繕・係船</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-box mnemonic">
+    <div class="box-title">覚え方</div>
+    <p><strong>危険なこと → 許可</strong>（危険物、工事）<br>
+    <strong>通常の出入り → 届出</strong>（入出港、停泊）</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> 第45条：特定港以外にも準用される規定</h2>
+  <p>以下の規定は特定港以外の港にも適用されます（試験頻出！）。</p>
+  <table class="styled-table">
+    <thead><tr><th>条文</th><th>内容</th></tr></thead>
+    <tbody>
+      <tr><td>第9条</td><td>船舶に対する移動命令</td></tr>
+      <tr><td>第21条</td><td>漂流物等の除却命令</td></tr>
+      <tr><td>第28条</td><td>私設信号の設置 → 許可</td></tr>
+      <tr><td>第31条</td><td>港内での工事・作業 → 許可</td></tr>
+      <tr><td>第36条</td><td>行先の表示</td></tr>
+      <tr><td>第37条2項</td><td>火災時の喫煙・火気取扱い禁止</td></tr>
+      <tr><td>第38条</td><td>水路通行船舶への信号</td></tr>
+      <tr><td>第39条</td><td>航路・区域の交通制限・禁止</td></tr>
+      <tr><td>第40条</td><td>原子力船への規制</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>特定港＝大型船が出入りする港（東京、横浜、神戸等）</li>
+    <li>許可：危険物の荷役等、工事・作業、いかだ運行、私設信号</li>
+    <li>届出：入出港、びょう泊、修繕・係船</li>
+    <li>第45条で特定港以外にも準用される規定がある（9条、21条、28条、31条等）</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"港内で危険物の荷役を行う場合に必要な手続きは？",options:["届出","登録","許可","報告"],answer:2,explanation:"危険物の荷役・運搬・貯蔵には港長の「許可」が必要です。"},
+    {q:"特定港以外の港にも準用される規定はどれか？",options:["入港届出","危険物の荷役許可","私設信号の設置許可（28条）","びょう泊の届出"],answer:2,explanation:"第45条により、私設信号の設置許可（28条）は特定港以外の港にも準用されます。"},
+    {q:"港への入出港時に必要な手続きは？",options:["許可","届出","認可","不要"],answer:1,explanation:"入港・出港は「届出」が必要です。許可ではなく届出で足ります。"}
+  ]
+},
+
+// ---------- LESSON 16: 海洋汚染防止法 ----------
+{
+  id:16, phase:3,
+  title:'海洋汚染等及び海上災害の防止に関する法律',
+  titleReading:'かいようおせんほう',
+  subtitle:'海の環境を守る法律',
+  objectives:['規制の全体像を理解する','6段階の手続き区別ができる','届出の時期の違いを把握する'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">油タンカーが事故を起こせば、大量の油が海に流れ出し、海洋生態系に壊滅的な被害を与えます。この法律は海洋環境を守るための規制を定めています。タンカー会社にとって最も身近な法律の一つです。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 規制の全体像</h2>
+  <p>この法律は3つの層で海洋環境を保護しています。</p>
+  <div class="flowchart">
+    <div class="flow-step red" style="width:80%"><strong>排出行為の規制</strong><br>船舶・海洋施設・航空機からの油・有害液体物質・廃棄物・排ガスの排出</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step orange" style="width:70%"><strong>廃出行為の規制</strong><br>海洋投棄</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step blue" style="width:60%"><strong>焼却の規制</strong></div>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> 6段階の手続き区別</h2>
+  <table class="styled-table">
+    <thead><tr><th>手続き</th><th>具体例</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge permit">許可</span></td><td>海洋施設からの廃棄物の海洋投入処分、廃油処理事業の開始</td></tr>
+      <tr><td><span class="badge authorization">承認</span></td><td>海洋汚染防止のための試験・研究・調査</td></tr>
+      <tr><td><span class="badge registration">登録</span></td><td>原動機取扱手引書の作成</td></tr>
+      <tr><td><span class="badge confirmation">確認</span></td><td>原動機からの窒素酸化物の放出量確認</td></tr>
+      <tr><td><span class="badge notification">届出</span></td><td>未査定液体物質の輸送、油濁処理規定の作成・変更等</td></tr>
+      <tr><td><span class="badge report">通報</span></td><td>油等の排出時（直ちに）、海難発生時</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> 届出の時期の区別</h2>
+  <table class="styled-table">
+    <thead><tr><th>時期</th><th>具体例</th></tr></thead>
+    <tbody>
+      <tr><td><strong>「あらかじめ」</strong></td><td>未査定液体物質の輸送、船舶間貨物油積替え</td></tr>
+      <tr><td><strong>「遅滞なく」</strong></td><td>油濁処理規定の作成・変更</td></tr>
+      <tr><td><strong>「直ちに」</strong></td><td>油等の排出があったとき → 通報</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box mnemonic">
+    <div class="box-title">覚え方：緊急度の順番</div>
+    <p>「<strong>直ちに</strong>」＞「<strong>遅滞なく</strong>」＞「<strong>あらかじめ</strong>」<br>
+    直ちに＝即座に（一瞬の猶予もない）、遅滞なく＝合理的な期間内に、あらかじめ＝事前に</p>
+  </div>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>規制は「排出」「廃出（海洋投棄）」「焼却」の3層構造</li>
+    <li>手続きは許可・承認・登録・確認・届出・通報の6段階</li>
+    <li>油の排出時は「直ちに」通報。最も緊急度が高い</li>
+    <li>事前の届出は「あらかじめ」、事後の届出は「遅滞なく」</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"油等の排出があった場合に求められる行動は？",options:["あらかじめ届出","遅滞なく届出","直ちに通報","7日以内に報告"],answer:2,explanation:"油等の排出があった場合は「直ちに」通報しなければなりません。最も緊急度の高い対応です。"},
+    {q:"廃油処理事業の開始に必要な手続きは？",options:["届出","登録","許可","承認"],answer:2,explanation:"廃油処理事業の開始には「許可」が必要です。"},
+    {q:"「遅滞なく」届出が必要なのは？",options:["未査定液体物質の輸送","油濁処理規定の作成・変更","油の排出時","船舶間貨物油積替え"],answer:1,explanation:"油濁処理規定の作成・変更は「遅滞なく」届出が必要です。未査定液体物質の輸送は「あらかじめ」です。"}
+  ]
+},
+
+// ---------- LESSON 17: 領海法 ----------
+{
+  id:17, phase:3,
+  title:'領海等における外国船舶の航行に関する法律',
+  titleReading:'りょうかいほう',
+  subtitle:'日本の海の範囲を学ぶ',
+  objectives:['海域の区分を説明できる','領海の範囲を答えられる','無害通航の意味を理解する'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">日本は海に囲まれた島国。その「海」には法律上の区分があります。<span class="key-term" data-term="領海">領海</span>では日本の法律が適用され、<span class="key-term" data-term="排他的経済水域">排他的経済水域（EEZ）</span>では天然資源の権利が認められています。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 海域の区分</h2>
+
+  <div class="zone-diagram">
+    <svg viewBox="0 0 600 220" style="width:100%;max-width:600px;display:block;margin:0 auto;">
+      <!-- Land -->
+      <rect x="0" y="0" width="60" height="220" fill="#8B7355"/>
+      <text x="30" y="120" text-anchor="middle" font-size="13" fill="white" font-weight="bold" font-family="sans-serif">陸地</text>
+      <!-- Baseline -->
+      <line x1="60" y1="0" x2="60" y2="220" stroke="#e74c3c" stroke-width="3" stroke-dasharray="8,4"/>
+      <text x="63" y="16" font-size="10" fill="#e74c3c" font-family="sans-serif">基線</text>
+      <!-- Internal waters -->
+      <rect x="40" y="30" width="20" height="180" fill="rgba(52,152,219,0.1)"/>
+      <text x="45" y="115" font-size="9" fill="#2980b9" writing-mode="tb" font-family="sans-serif">内水</text>
+      <!-- Territorial sea -->
+      <rect x="60" y="30" width="120" height="180" fill="rgba(52,152,219,0.15)"/>
+      <text x="120" y="100" text-anchor="middle" font-size="12" fill="#2980b9" font-weight="bold" font-family="sans-serif">領海</text>
+      <text x="120" y="118" text-anchor="middle" font-size="10" fill="#2980b9" font-family="sans-serif">12海里</text>
+      <text x="120" y="133" text-anchor="middle" font-size="9" fill="#2980b9" font-family="sans-serif">(約22.2km)</text>
+      <!-- Contiguous zone -->
+      <rect x="180" y="30" width="60" height="180" fill="rgba(155,89,182,0.1)"/>
+      <text x="210" y="105" text-anchor="middle" font-size="10" fill="#8e44ad" font-family="sans-serif">接続</text>
+      <text x="210" y="120" text-anchor="middle" font-size="10" fill="#8e44ad" font-family="sans-serif">水域</text>
+      <!-- EEZ -->
+      <rect x="240" y="30" width="240" height="180" fill="rgba(39,174,96,0.08)"/>
+      <text x="360" y="100" text-anchor="middle" font-size="12" fill="#27ae60" font-weight="bold" font-family="sans-serif">排他的経済水域(EEZ)</text>
+      <text x="360" y="118" text-anchor="middle" font-size="10" fill="#27ae60" font-family="sans-serif">基線から200海里</text>
+      <text x="360" y="133" text-anchor="middle" font-size="9" fill="#27ae60" font-family="sans-serif">(約370.4km)</text>
+      <!-- High seas -->
+      <rect x="480" y="30" width="120" height="180" fill="rgba(149,165,166,0.1)"/>
+      <text x="540" y="110" text-anchor="middle" font-size="12" fill="#7f8c8d" font-weight="bold" font-family="sans-serif">公海</text>
+      <!-- Bracket for 領海等 -->
+      <line x1="40" y1="215" x2="180" y2="215" stroke="#e67e22" stroke-width="2"/>
+      <text x="110" y="212" text-anchor="middle" font-size="10" fill="#e67e22" font-weight="bold" font-family="sans-serif">「領海等」= 領海＋内水</text>
+    </svg>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> <span class="key-term" data-term="無害通航">無害通航</span></h2>
+  <p>外国船舶は日本の領海を<strong>無害に通航する権利</strong>を有します。ただし以下の行為は「有害」とされます：</p>
+  <ul style="margin-left:20px;font-size:0.85rem;">
+    <li>武力による威嚇・行使</li>
+    <li>兵器を用いる訓練・演習</li>
+    <li>情報収集活動</li>
+    <li>航空機の発着・搭載</li>
+    <li>漁獲活動</li>
+    <li>汚染行為</li>
+  </ul>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>領海＝基線から12海里（約22.2km）。日本の主権が及ぶ</li>
+    <li>EEZ＝基線から200海里（約370.4km）。天然資源の権利</li>
+    <li>「領海等」＝ 領海 ＋ 内水</li>
+    <li>外国船舶は無害通航権を有するが、軍事演習・漁獲等は禁止</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"日本の領海の範囲は基線から何海里か？",options:["3海里","12海里","24海里","200海里"],answer:1,explanation:"領海は基線から12海里（約22.2km）です。200海里はEEZです。"},
+    {q:"「領海等」に含まれるのは？",options:["領海と接続水域","領海と内水","領海とEEZ","領海のみ"],answer:1,explanation:"「領海等」は領海と内水を合わせたものです。"},
+    {q:"外国船舶の無害通航で許されないのは？",options:["通常の航行","積荷の運搬","漁獲活動","領海の通過"],answer:2,explanation:"漁獲活動は「有害」な行為とされ、無害通航の範囲外です。"}
+  ]
+},
+
+// ---------- LESSON 18: 船員職業安定法 ----------
+{
+  id:18, phase:3,
+  title:'船員職業安定法',
+  titleReading:'せんいんしょくぎょうあんていほう',
+  subtitle:'船員の就職を支援する法律',
+  objectives:['第60条の4項目を説明できる','許可の有効期間を知る','無料船員職業紹介事業を理解する'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">船員の仕事は特殊です。長期間の乗船、危険を伴う作業。そんな船員の就職を適正に支援するための法律が船員職業安定法です。特に第60条は試験超頻出（AAAランク）！</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 第60条（超重要・AAAランク）</h2>
+  <p>この条文は4つの項からなり、船員の募集・紹介における不正を防ぐ規定です。</p>
+
+  <table class="styled-table">
+    <thead><tr><th>項</th><th>内容</th></tr></thead>
+    <tbody>
+      <tr><td><strong>第1項</strong></td><td>募集内容に<strong>虚偽</strong>があってはならない</td></tr>
+      <tr><td><strong>第2項</strong></td><td>被募集者から<strong>報酬を受けてはならない</strong></td></tr>
+      <tr><td><strong>第3項</strong></td><td>求人の申込み・紹介について<strong>報酬を受けてはならない</strong>（いかなる名義でも）</td></tr>
+      <tr><td><strong>第4項</strong></td><td>第3項は船員関係の規程を排除しない</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box warning">
+    <div class="box-title">試験ではここが問われる！</div>
+    <p>第2項と第3項の区別が重要。<br>
+    第2項：<strong>被募集者から</strong>報酬を受けてはならない（お金を取ってはダメ）<br>
+    第3項：<strong>求人・紹介について</strong>報酬を受けてはならない（紹介料もダメ）<br>
+    第4項：但し船員関係の既存規程は排除されない（補完関係）</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> 許可の有効期間</h2>
+  <div class="def-list">
+    <div class="def-item"><span class="def-label">初回</span><span><strong>3年</strong></span></div>
+    <div class="def-item"><span class="def-label">更新後</span><span><strong>5年</strong></span></div>
+  </div>
+
+  <div class="info-box mnemonic">
+    <div class="box-title">覚え方</div>
+    <p>「初回は<strong>3</strong>年（お試し）、更新は<strong>5</strong>年（信頼できたら長く）」</p>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> 無料船員職業紹介事業</h2>
+  <p>船員の職業紹介を<strong>無料</strong>で行う事業です。船員の雇用機会の確保と適正な就職を支援する目的で行われます。</p>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>第60条は4つの項で募集・紹介の不正を禁止（超頻出）</li>
+    <li>虚偽の募集内容は禁止（第1項）</li>
+    <li>被募集者・求人紹介からの報酬受領は禁止（第2項・第3項）</li>
+    <li>許可の有効期間：初回3年、更新後5年</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"船員職業安定法第60条第2項の内容は？",options:["募集内容に虚偽があってはならない","被募集者から報酬を受けてはならない","求人紹介について報酬を受けてはならない","船員関係の規程を排除しない"],answer:1,explanation:"第60条第2項は「被募集者から報酬を受けてはならない」です。第1項が虚偽禁止、第3項が紹介報酬禁止です。"},
+    {q:"船員職業紹介事業の許可の初回の有効期間は？",options:["1年","3年","5年","10年"],answer:1,explanation:"初回の有効期間は3年です。更新後は5年になります。"},
+    {q:"第60条第3項で禁止されているのは？",options:["虚偽の募集","被募集者からの報酬受領","求人申込み・紹介についての報酬受領","船員手帳の偽造"],answer:2,explanation:"第3項は「求人の申込み・紹介について報酬を受けてはならない（いかなる名義でも）」です。"}
+  ]
+},
+
+// ---------- LESSON 19: ISPS法 ----------
+{
+  id:19, phase:4,
+  title:'国際船舶・港湾施設の保安確保法（ISPS法）',
+  titleReading:'アイエスピーエスほう',
+  subtitle:'テロ対策の国際基準',
+  objectives:['ISPS法の制定背景を理解する','保安レベルの3段階を説明できる','国際航海船舶の定義を知る'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">2001年9月11日のアメリカ同時多発テロ。この事件をきっかけに、国際海事機関（IMO）はSOLAS条約を改正し、船舶と港湾施設のテロ対策を義務化しました。その国内法がISPS法です。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 保安レベル</h2>
+  <table class="styled-table">
+    <thead><tr><th>レベル</th><th>名称</th><th>状況</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge authorization">レベル1</span></td><td>通常</td><td>最低限の保安措置を維持</td></tr>
+      <tr><td><span class="badge approval">レベル2</span></td><td>高められた</td><td>テロの脅威が高まった場合</td></tr>
+      <tr><td><span class="badge permit">レベル3</span></td><td>特別</td><td>テロの脅威が具体的・差し迫っている場合</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> 国際航海船舶の定義</h2>
+  <p>ISPS法が適用される「国際航海船舶」とは：</p>
+  <ul style="margin-left:20px;font-size:0.85rem;">
+    <li>国際航海に従事する<strong>旅客船</strong></li>
+    <li>国際航海に従事する総トン数<strong>500トン以上</strong>の船舶</li>
+  </ul>
+
+  <div class="info-box note">
+    <div class="box-title">船舶保安計画</div>
+    <p>国際航海船舶は<strong>船舶保安計画</strong>を策定し、国土交通大臣の承認を受ける必要があります。計画には、各保安レベルに応じた具体的な保安措置が記載されます。</p>
+  </div>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>ISPS法は9.11後のテロ対策として制定された国際条約の国内法</li>
+    <li>保安レベルは3段階：通常（1）・高められた（2）・特別（3）</li>
+    <li>対象：国際航海の旅客船＋500トン以上の船舶</li>
+    <li>船舶保安計画の策定と国土交通大臣の承認が必要</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"ISPS法が制定されるきっかけとなった出来事は？",options:["タイタニック号沈没","エクソン・バルディーズ号油流出","アメリカ同時多発テロ（9.11）","スエズ運河封鎖"],answer:2,explanation:"2001年9月11日のアメリカ同時多発テロを契機に、船舶・港湾のテロ対策としてISPS法が制定されました。"},
+    {q:"ISPS法における保安レベル2の名称は？",options:["通常","高められた","特別","緊急"],answer:1,explanation:"レベル2は「高められた」保安レベルです。レベル1が通常、レベル3が特別です。"},
+    {q:"ISPS法が適用される国際航海船舶の要件（旅客船以外）は？",options:["総トン数100トン以上","総トン数300トン以上","総トン数500トン以上","総トン数1000トン以上"],answer:2,explanation:"国際航海に従事する総トン数500トン以上の船舶にISPS法が適用されます。"}
+  ]
+},
+
+// ---------- LESSON 20: 港湾法・港湾運送事業法 ----------
+{
+  id:20, phase:4,
+  title:'港湾法・港湾運送事業法',
+  titleReading:'こうわんほう・こうわんうんそうじぎょうほう',
+  subtitle:'港の管理と荷役事業',
+  objectives:['港湾管理者と港湾区域を理解する','港湾運送事業の種類を知る','許可制であることを理解する'],
+  content:`
+<div class="intro-box">
+  <div class="scenario">船が港に着いたら、荷物を降ろさなければなりません。この「港での荷役作業」を行う事業が港湾運送事業です。港自体の管理は港湾法で定められています。</div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">1</span> 港湾法の基礎</h2>
+  <div class="def-list">
+    <div class="def-item"><span class="def-label">港湾管理者</span><span>港湾の管理を行う主体（地方公共団体が多い）</span></div>
+    <div class="def-item"><span class="def-label">港湾区域</span><span>港湾管理者が管理する水域</span></div>
+    <div class="def-item"><span class="def-label">臨港地区</span><span>港湾に隣接する陸域で、港湾の機能を確保するために定められた地区</span></div>
+  </div>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">2</span> 港湾運送事業の種類</h2>
+  <table class="styled-table">
+    <thead><tr><th>事業の種類</th><th>内容</th></tr></thead>
+    <tbody>
+      <tr><td><strong>一般港湾運送</strong></td><td>荷主からの委託で港湾運送を一括して行う</td></tr>
+      <tr><td><strong>港湾荷役</strong></td><td>船への積込み・船からの取卸し</td></tr>
+      <tr><td><strong>はしけ運送</strong></td><td>はしけ（平底の小型船）で港内を運送</td></tr>
+      <tr><td><strong>いかだ運送</strong></td><td>木材をいかだに組んで運送</td></tr>
+      <tr><td><strong>検数</strong></td><td>貨物の個数の計算・受渡しの確認</td></tr>
+      <tr><td><strong>鑑定</strong></td><td>貨物の品質・数量等の鑑定</td></tr>
+      <tr><td><strong>検量</strong></td><td>貨物の容積・重量の計量</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="lesson-section">
+  <h2><span class="section-num">3</span> 規制のポイント</h2>
+  <div class="two-col">
+    <div class="col-card" style="border-top:4px solid var(--permit-red)">
+      <h4>事業開始 → <span class="badge permit">許可</span>制</h4>
+      <p style="font-size:0.8rem;">港湾運送事業を行うには国土交通大臣の許可が必要です。港湾労働者の保護・安全のため、厳しい規制が適用されます。</p>
+    </div>
+    <div class="col-card" style="border-top:4px solid var(--notification-blue)">
+      <h4>料金 → <span class="badge notification">届出</span>制</h4>
+      <p style="font-size:0.8rem;">料金の制定・変更は届出で足ります。</p>
+    </div>
+  </div>
+</div>
+
+<div class="summary-box">
+  <h3>まとめ</h3>
+  <ul>
+    <li>港湾管理者は港湾区域と臨港地区を管理する</li>
+    <li>港湾運送事業は一般港湾運送・港湾荷役・はしけ運送等の種類がある</li>
+    <li>事業開始は許可制（厳しい規制）</li>
+    <li>料金の制定・変更は届出</li>
+  </ul>
+</div>`,
+  quiz:[
+    {q:"港湾運送事業を開始するために必要な手続きは？",options:["届出","登録","許可","認可"],answer:2,explanation:"港湾運送事業の開始には国土交通大臣の「許可」が必要です。"},
+    {q:"貨物の個数の計算や受渡しの確認を行う事業は？",options:["検量","鑑定","検数","一般港湾運送"],answer:2,explanation:"検数は貨物の個数の計算・受渡しの確認を行う事業です。検量は容積・重量、鑑定は品質等です。"},
+    {q:"港湾運送事業の料金の変更に必要な手続きは？",options:["許可","認可","届出","不要"],answer:2,explanation:"料金の制定・変更は「届出」です。事業開始は許可ですが、料金変更は届出で足ります。"}
+  ]
+}
+
+]; // END LESSONS
+
+// ===================================================================
+// APP STATE & LOGIC
+// ===================================================================
+
+let state = {
+  currentLesson: null,
+  completedLessons: [],
+  bookmarks: [],
+  darkMode: false,
+  sidebarOpen: true,
+  startTime: Date.now(),
+  totalStudyMinutes: 0,
+  quizAnswers: {},
+};
+
+// Load state from localStorage
+function loadState() {
+  try {
+    const saved = localStorage.getItem('kaiji_textbook_state');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      state = { ...state, ...parsed, startTime: Date.now() };
+    }
+  } catch(e) { console.log('State load failed'); }
+}
+
+function saveState() {
+  try {
+    const elapsed = Math.floor((Date.now() - state.startTime) / 60000);
+    state.totalStudyMinutes += elapsed;
+    state.startTime = Date.now();
+    localStorage.setItem('kaiji_textbook_state', JSON.stringify({
+      completedLessons: state.completedLessons,
+      bookmarks: state.bookmarks,
+      darkMode: state.darkMode,
+      totalStudyMinutes: state.totalStudyMinutes,
+      quizAnswers: state.quizAnswers,
+    }));
+  } catch(e) { console.log('State save failed'); }
+}
+
+// ===== SIDEBAR =====
+function buildSidebar() {
+  const nav = document.getElementById('sidebar-nav');
+  let html = '';
+  PHASES.forEach(phase => {
+    html += `<div class="phase-group">`;
+    html += `<div class="phase-header expanded" onclick="togglePhase(this)">
+      <span class="arrow">&#9654;</span> ${phase.title}
+    </div>`;
+    html += `<div class="phase-lessons">`;
+    phase.lessons.forEach(lid => {
+      const lesson = LESSONS.find(l => l.id === lid);
+      const completed = state.completedLessons.includes(lid);
+      const active = state.currentLesson === lid;
+      const icon = completed ? '&#10003;' : '&#9675;';
+      const cls = (completed ? ' completed' : '') + (active ? ' active' : '');
+      html += `<div class="lesson-item${cls}" data-lesson="${lid}" onclick="openLesson(${lid})">
+        <span class="status-icon">${icon}</span>
+        <span>Lesson ${lid}: ${lesson.title}</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  nav.innerHTML = html;
+}
+
+function togglePhase(el) {
+  el.classList.toggle('expanded');
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.classList.toggle('collapsed');
+  state.sidebarOpen = !sb.classList.contains('collapsed');
+  document.getElementById('main').style.marginLeft = state.sidebarOpen ? '300px' : '0';
+  document.getElementById('topbar').style.left = state.sidebarOpen ? '300px' : '0';
+}
+
+function updateProgress() {
+  const pct = Math.round((state.completedLessons.length / LESSONS.length) * 100);
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('completed-count').textContent = state.completedLessons.length + '/' + LESSONS.length + ' 完了';
+  const mins = state.totalStudyMinutes + Math.floor((Date.now() - state.startTime) / 60000);
+  document.getElementById('study-time').textContent = '学習時間: ' + mins + '分';
+}
+
+// ===== DARK MODE =====
+function toggleDarkMode() {
+  state.darkMode = !state.darkMode;
+  document.documentElement.setAttribute('data-theme', state.darkMode ? 'dark' : 'light');
+  document.getElementById('dark-toggle').textContent = state.darkMode ? '\u2600' : '\u263D';
+  saveState();
+}
+
+// ===== TERM POPUP =====
+function showTermPopup(termKey) {
+  const term = TERMS[termKey];
+  if (!term) return;
+  document.getElementById('term-title').textContent = termKey;
+  document.getElementById('term-reading').textContent = term.reading;
+  document.getElementById('term-definition').textContent = term.definition;
+  document.getElementById('term-example').textContent = term.example;
+  document.getElementById('term-article').textContent = term.article;
+  const btn = document.getElementById('term-bookmark-btn');
+  const isBookmarked = state.bookmarks.includes(termKey);
+  btn.classList.toggle('bookmarked', isBookmarked);
+  btn.innerHTML = (isBookmarked ? '&#9733;' : '&#9734;') + ' ブックマーク';
+  btn.setAttribute('data-term', termKey);
+  document.getElementById('term-overlay').classList.add('show');
+  document.getElementById('term-popup').classList.add('show');
+}
+
+function closeTermPopup() {
+  document.getElementById('term-overlay').classList.remove('show');
+  document.getElementById('term-popup').classList.remove('show');
+}
+
+function toggleBookmark() {
+  const btn = document.getElementById('term-bookmark-btn');
+  const termKey = btn.getAttribute('data-term');
+  const idx = state.bookmarks.indexOf(termKey);
+  if (idx >= 0) {
+    state.bookmarks.splice(idx, 1);
+    btn.classList.remove('bookmarked');
+    btn.innerHTML = '&#9734; ブックマーク';
+  } else {
+    state.bookmarks.push(termKey);
+    btn.classList.add('bookmarked');
+    btn.innerHTML = '&#9733; ブックマーク';
+  }
+  saveState();
+  renderBookmarks();
+}
+
+// ===== BOOKMARKS PANEL =====
+function toggleBookmarks() {
+  const panel = document.getElementById('bookmarks-panel');
+  panel.classList.toggle('show');
+  renderBookmarks();
+}
+
+function renderBookmarks() {
+  const list = document.getElementById('bookmarks-list');
+  if (state.bookmarks.length === 0) {
+    list.innerHTML = '<p style="font-size:0.8rem;color:var(--text-light);">ブックマークした用語はまだありません。<br>レッスン中の用語をクリックしてブックマークしましょう。</p>';
+    return;
+  }
+  list.innerHTML = state.bookmarks.map(key => {
+    const t = TERMS[key];
+    return `<div class="bookmark-item" onclick="showTermPopup('${key}')">
+      <div class="term">${key}</div>
+      <div class="reading">${t ? t.reading : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== SEARCH =====
+function searchTerms(query) {
+  const results = document.getElementById('search-results');
+  if (!query || query.length < 1) { results.innerHTML = ''; return; }
+  const matches = Object.keys(TERMS).filter(k =>
+    k.includes(query) || TERMS[k].reading.includes(query) || TERMS[k].definition.includes(query)
+  );
+  results.innerHTML = matches.slice(0, 8).map(k =>
+    `<div class="search-result-item" onclick="showTermPopup('${k}')">${k}（${TERMS[k].reading}）</div>`
+  ).join('');
+}
+
+// ===== LESSON RENDERING =====
+function openLesson(id) {
+  const lesson = LESSONS.find(l => l.id === id);
+  if (!lesson) return;
+  state.currentLesson = id;
+  state.quizAnswers[id] = state.quizAnswers[id] || {};
+  buildSidebar();
+  updateProgress();
+  document.getElementById('current-lesson-title').textContent = `Lesson ${id}: ${lesson.title}`;
+
+  const prevLesson = id > 1 ? LESSONS.find(l => l.id === id - 1) : null;
+  const nextLesson = id < LESSONS.length ? LESSONS.find(l => l.id === id + 1) : null;
+
+  let html = `<div class="lesson-container">`;
+  // Progress bar
+  html += `<div class="lesson-progress-bar"><div class="lesson-progress-track"><div class="lesson-progress-fill" id="lesson-progress"></div></div></div>`;
+  // Header
+  html += `<div class="lesson-header">
+    <span class="lesson-phase-tag">Phase ${lesson.phase}</span>
+    <h1><ruby>${lesson.title}<rt>${lesson.titleReading}</rt></ruby></h1>
+    <p style="color:var(--text-light);font-size:0.85rem;">${lesson.subtitle}</p>
+    <div class="learning-objectives">
+      <h3>この講義の学習目標</h3>
+      <ul>${lesson.objectives.map(o => `<li>${o}</li>`).join('')}</ul>
+    </div>
+  </div>`;
+
+  // Content
+  html += lesson.content;
+
+  // Quiz
+  if (lesson.quiz && lesson.quiz.length > 0) {
+    html += `<div class="quiz-section">
+      <h3>理解度チェック</h3>
+      <p class="quiz-subtitle">3問中2問正解でこのレッスンを完了できます。</p>`;
+    lesson.quiz.forEach((q, i) => {
+      html += `<div class="quiz-question" id="quiz-q${i}">
+        <p>Q${i+1}. ${q.q}</p>
+        <div class="quiz-options">`;
+      q.options.forEach((opt, j) => {
+        html += `<div class="quiz-option" data-q="${i}" data-opt="${j}" onclick="selectQuizOption(${id},${i},${j})">${opt}</div>`;
+      });
+      html += `</div>
+        <div class="quiz-explanation" id="quiz-exp${i}">${q.explanation}</div>
+      </div>`;
+    });
+    html += `<div style="text-align:center;">
+      <button class="quiz-submit-btn" id="quiz-submit" onclick="submitQuiz(${id})">回答を確認する</button>
+    </div>
+    <div class="quiz-result" id="quiz-result"></div>
+    </div>`;
+  }
+
+  // Navigation
+  html += `<div class="lesson-nav">`;
+  if (prevLesson) {
+    html += `<button class="lesson-nav-btn prev" onclick="openLesson(${prevLesson.id})">
+      <span class="label">&larr; 前のレッスン</span>
+      Lesson ${prevLesson.id}: ${prevLesson.title}
+    </button>`;
+  } else {
+    html += `<button class="lesson-nav-btn prev" onclick="showWelcome()">
+      <span class="label">&larr; 戻る</span>ホーム
+    </button>`;
+  }
+  if (nextLesson) {
+    html += `<button class="lesson-nav-btn next" onclick="openLesson(${nextLesson.id})">
+      <span class="label">次のレッスン &rarr;</span>
+      Lesson ${nextLesson.id}: ${nextLesson.title}
+    </button>`;
+  }
+  html += `</div></div>`;
+
+  document.getElementById('content').innerHTML = html;
+  window.scrollTo(0, 0);
+
+  // Attach key-term click handlers
+  setTimeout(() => {
+    document.querySelectorAll('.key-term').forEach(el => {
+      el.addEventListener('click', () => showTermPopup(el.getAttribute('data-term')));
+    });
+    // Attach expand cards
+    document.querySelectorAll('.expand-card-header').forEach(el => {
+      el.addEventListener('click', () => el.parentElement.classList.toggle('open'));
+    });
+    // Restore quiz answers
+    const saved = state.quizAnswers[id] || {};
+    Object.keys(saved).forEach(qi => {
+      const opt = saved[qi];
+      const el = document.querySelector(`.quiz-option[data-q="${qi}"][data-opt="${opt}"]`);
+      if (el) el.classList.add('selected');
+    });
+    // Scroll progress tracking
+    trackLessonProgress();
+  }, 100);
+
+  saveState();
+}
+
+function selectQuizOption(lessonId, qIdx, optIdx) {
+  // Deselect others in same question
+  document.querySelectorAll(`.quiz-option[data-q="${qIdx}"]`).forEach(el => el.classList.remove('selected'));
+  // Select this one
+  const el = document.querySelector(`.quiz-option[data-q="${qIdx}"][data-opt="${optIdx}"]`);
+  if (el) el.classList.add('selected');
+  // Save
+  if (!state.quizAnswers[lessonId]) state.quizAnswers[lessonId] = {};
+  state.quizAnswers[lessonId][qIdx] = optIdx;
+  saveState();
+}
+
+function submitQuiz(lessonId) {
+  const lesson = LESSONS.find(l => l.id === lessonId);
+  if (!lesson || !lesson.quiz) return;
+  const answers = state.quizAnswers[lessonId] || {};
+  let correct = 0;
+
+  lesson.quiz.forEach((q, i) => {
+    const selected = answers[i];
+    const options = document.querySelectorAll(`.quiz-option[data-q="${i}"]`);
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      const optIdx = parseInt(opt.getAttribute('data-opt'));
+      if (optIdx === q.answer) opt.classList.add('correct');
+      if (optIdx === selected && optIdx !== q.answer) opt.classList.add('incorrect');
+    });
+    if (selected === q.answer) correct++;
+    document.getElementById('quiz-exp' + i).classList.add('show');
+  });
+
+  const result = document.getElementById('quiz-result');
+  const passed = correct >= 2;
+  result.className = 'quiz-result show ' + (passed ? 'pass' : 'fail');
+  result.innerHTML = passed
+    ? `<h3 style="color:var(--success);">${correct}/3 正解！レッスン完了！</h3><p>よくできました。次のレッスンに進みましょう。</p>`
+    : `<h3 style="color:var(--danger);">${correct}/3 正解</h3><p>2問以上の正解が必要です。内容を復習してもう一度挑戦しましょう。<br><button class="quiz-submit-btn" onclick="retryQuiz(${lessonId})" style="margin-top:10px;">もう一度挑戦</button></p>`;
+
+  document.getElementById('quiz-submit').style.display = 'none';
+
+  if (passed && !state.completedLessons.includes(lessonId)) {
+    state.completedLessons.push(lessonId);
+    buildSidebar();
+    updateProgress();
+    saveState();
+  }
+}
+
+function retryQuiz(lessonId) {
+  state.quizAnswers[lessonId] = {};
+  saveState();
+  openLesson(lessonId);
+  // Scroll to quiz
+  setTimeout(() => {
+    const quizEl = document.querySelector('.quiz-section');
+    if (quizEl) quizEl.scrollIntoView({ behavior:'smooth' });
+  }, 200);
+}
+
+// ===== LESSON PROGRESS TRACKING =====
+function trackLessonProgress() {
+  const progressBar = document.getElementById('lesson-progress');
+  if (!progressBar) return;
+  const update = () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? Math.min(100, Math.round((scrollTop / docHeight) * 100)) : 100;
+    progressBar.style.width = pct + '%';
+  };
+  window.addEventListener('scroll', update);
+  update();
+}
+
+// ===== WELCOME SCREEN =====
+function showWelcome() {
+  state.currentLesson = null;
+  document.getElementById('current-lesson-title').textContent = 'ホーム';
+  buildSidebar();
+  updateProgress();
+
+  const nextLesson = LESSONS.find(l => !state.completedLessons.includes(l.id)) || LESSONS[0];
+
+  document.getElementById('content').innerHTML = `
+    <div class="welcome-screen fade-in">
+      <h1>海事代理士試験<br>インタラクティブテキスト</h1>
+      <p class="lead">ゼロから学ぶ海事法規の世界。全20レッスンで合格力を身につけましょう。</p>
+
+      <div class="welcome-cards">
+        <div class="welcome-card recommended" onclick="openLesson(${nextLesson.id})">
+          <div class="emoji">&#128218;</div>
+          <h3>次のレッスン</h3>
+          <p>Lesson ${nextLesson.id}: ${nextLesson.title}</p>
+        </div>
+        <div class="welcome-card" onclick="openLesson(1)">
+          <div class="emoji">&#127793;</div>
+          <h3>最初から</h3>
+          <p>Phase 1: 法律の基礎固め</p>
+        </div>
+        <div class="welcome-card" onclick="toggleBookmarks()">
+          <div class="emoji">&#9734;</div>
+          <h3>ブックマーク</h3>
+          <p>${state.bookmarks.length}個の用語を保存中</p>
+        </div>
+        <div class="welcome-card" onclick="showAllTerms()">
+          <div class="emoji">&#128209;</div>
+          <h3>用語辞典</h3>
+          <p>${Object.keys(TERMS).length}個の重要用語</p>
+        </div>
+      </div>
+
+      <div style="margin-top:30px;">
+        <button class="start-btn" onclick="openLesson(${nextLesson.id})">
+          学習を始める &rarr;
+        </button>
+      </div>
+
+      <div style="margin-top:40px;text-align:left;max-width:600px;margin-left:auto;margin-right:auto;">
+        <h3 style="font-family:var(--font-heading);font-size:1rem;margin-bottom:12px;">カリキュラム全体像</h3>
+        ${PHASES.map(phase => `
+          <div style="margin-bottom:16px;">
+            <h4 style="font-family:var(--font-heading);font-size:0.85rem;color:var(--accent);margin-bottom:6px;">${phase.title}</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              ${phase.lessons.map(lid => {
+                const l = LESSONS.find(x => x.id === lid);
+                const done = state.completedLessons.includes(lid);
+                return `<span style="font-size:0.7rem;padding:4px 10px;border-radius:12px;border:1px solid ${done ? 'var(--success)' : 'var(--border)'};background:${done ? 'rgba(39,174,96,0.1)' : 'transparent'};cursor:pointer;" onclick="openLesson(${lid})">${done ? '&#10003; ' : ''}${l.title}</span>`;
+              }).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  window.scrollTo(0, 0);
+}
+
+function showAllTerms() {
+  state.currentLesson = null;
+  document.getElementById('current-lesson-title').textContent = '用語辞典';
+
+  let html = `<div class="lesson-container fade-in">
+    <div class="lesson-header">
+      <h1>重要用語辞典</h1>
+      <p style="color:var(--text-light);font-size:0.85rem;">${Object.keys(TERMS).length}個の重要用語を収録</p>
+    </div>`;
+
+  const sortedTerms = Object.keys(TERMS).sort();
+  sortedTerms.forEach(key => {
+    const t = TERMS[key];
+    html += `<div class="expand-card">
+      <div class="expand-card-header" onclick="this.parentElement.classList.toggle('open')">
+        <span>${key}（${t.reading}）</span>
+        <span class="icon">&#9660;</span>
+      </div>
+      <div class="expand-card-body">
+        <p><strong>定義：</strong>${t.definition}</p>
+        <p><strong>具体例：</strong>${t.example}</p>
+        <p><strong>関連条文：</strong>${t.article}</p>
+      </div>
+    </div>`;
+  });
+
+  html += `<div style="margin-top:20px;text-align:center;">
+    <button class="lesson-nav-btn" onclick="showWelcome()" style="max-width:200px;margin:0 auto;">&larr; ホームに戻る</button>
+  </div></div>`;
+
+  document.getElementById('content').innerHTML = html;
+  window.scrollTo(0, 0);
+}
+
+// ===== INIT =====
+function init() {
+  loadState();
+  if (state.darkMode) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.getElementById('dark-toggle').textContent = '\u2600';
+  }
+  buildSidebar();
+  updateProgress();
+  showWelcome();
+
+  // Mobile: start with sidebar closed
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.add('collapsed');
+    state.sidebarOpen = false;
+    document.getElementById('main').style.marginLeft = '0';
+    document.getElementById('topbar').style.left = '0';
+  }
+
+  // Auto-save periodically
+  setInterval(() => { updateProgress(); saveState(); }, 60000);
+}
+
+init();
+</script>
+</body>
+</html>

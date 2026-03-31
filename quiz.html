@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海事代理士試験 クイズマスター</title>
+<style>
+:root {
+  --primary: #1a365d;
+  --primary-light: #2a4a7f;
+  --primary-dark: #0f2341;
+  --gold: #f6ad55;
+  --gold-light: #fbd38d;
+  --gold-dark: #dd8a2e;
+  --success: #48bb78;
+  --danger: #fc8181;
+  --bg: #f7fafc;
+  --card-bg: #ffffff;
+  --text: #1a202c;
+  --text-muted: #718096;
+  --border: #e2e8f0;
+  --shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+  --radius: 12px;
+  --transition: .3s cubic-bezier(.4,0,.2,1);
+}
+.dark {
+  --primary: #2a4a7f;
+  --primary-light: #3b5fa0;
+  --primary-dark: #1a365d;
+  --bg: #0f1729;
+  --card-bg: #1a2332;
+  --text: #e2e8f0;
+  --text-muted: #a0aec0;
+  --border: #2d3748;
+  --shadow: 0 4px 6px -1px rgba(0,0,0,.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.4);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Segoe UI','Hiragino Sans','Meiryo',sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background var(--transition), color var(--transition);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.container { max-width: 800px; margin: 0 auto; padding: 16px; }
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-lg);
+}
+.header-title {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-title .icon { font-size: 1.4rem; }
+.header-stats {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.stat-badge {
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: .85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.stat-badge .val { color: var(--gold-light); }
+
+/* XP Bar */
+.xp-bar-wrap {
+  background: rgba(255,255,255,.1);
+  height: 6px;
+  width: 100%;
+  position: relative;
+}
+.xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  transition: width .6s ease;
+  border-radius: 0 3px 3px 0;
+}
+
+/* Navigation */
+.nav {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.nav-btn {
+  padding: 8px 16px;
+  border: 2px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: .85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+.nav-btn:hover { border-color: var(--primary); color: var(--primary); }
+.nav-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* Dark toggle */
+.dark-toggle {
+  background: rgba(255,255,255,.2);
+  border: none;
+  color: #fff;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.dark-toggle:hover { background: rgba(255,255,255,.3); }
+
+/* Cards */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+}
+
+/* Screen management */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* Dashboard */
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.dash-stat {
+  text-align: center;
+  padding: 20px;
+}
+.dash-stat .num {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+}
+.dark .dash-stat .num { color: var(--gold); }
+.dash-stat .label {
+  font-size: .85rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Mode select */
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.mode-card {
+  background: var(--card-bg);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.mode-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+.mode-card .mode-icon { font-size: 2rem; margin-bottom: 8px; }
+.mode-card .mode-name { font-weight: 700; font-size: 1rem; }
+.mode-card .mode-desc { font-size: .8rem; color: var(--text-muted); margin-top: 4px; }
+
+/* Subject list */
+.subject-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin: 16px 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.subject-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: .85rem;
+}
+.subject-item:hover { background: var(--primary); color: #fff; }
+.subject-item .subj-bar {
+  width: 40px; height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.subject-item .subj-bar-fill {
+  height: 100%;
+  background: var(--success);
+  border-radius: 3px;
+}
+
+/* Quiz */
+.quiz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.quiz-progress {
+  font-size: .85rem;
+  color: var(--text-muted);
+}
+.quiz-subject-tag {
+  background: var(--primary);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: .75rem;
+  font-weight: 600;
+}
+.quiz-difficulty {
+  display: flex;
+  gap: 3px;
+}
+.quiz-difficulty .star {
+  color: var(--gold);
+  font-size: .9rem;
+}
+.quiz-difficulty .star.empty {
+  opacity: .3;
+}
+
+.question-card {
+  background: var(--card-bg);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 20px;
+  min-height: 120px;
+  position: relative;
+}
+.question-num {
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  background: var(--primary);
+  color: #fff;
+  padding: 2px 14px;
+  border-radius: 12px;
+  font-size: .8rem;
+  font-weight: 700;
+}
+.question-text {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  font-weight: 500;
+}
+.leitner-box-tag {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: .7rem;
+  font-weight: 700;
+  color: #fff;
+}
+.box-1 { background: #e53e3e; }
+.box-2 { background: #ed8936; }
+.box-3 { background: #ecc94b; color: #1a202c; }
+.box-4 { background: #48bb78; }
+.box-5 { background: #4299e1; }
+
+/* Choices */
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.choice-btn {
+  width: 100%;
+  padding: 14px 20px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all .2s;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  line-height: 1.6;
+}
+.choice-btn:hover:not(.disabled) {
+  border-color: var(--primary);
+  background: rgba(26,54,93,.05);
+  transform: translateX(4px);
+}
+.dark .choice-btn:hover:not(.disabled) {
+  background: rgba(255,255,255,.05);
+}
+.choice-btn .choice-label {
+  background: var(--primary);
+  color: #fff;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: .85rem;
+  flex-shrink: 0;
+}
+.choice-btn.correct {
+  border-color: var(--success);
+  background: rgba(72,187,120,.1);
+}
+.choice-btn.correct .choice-label { background: var(--success); }
+.choice-btn.incorrect {
+  border-color: var(--danger);
+  background: rgba(252,129,129,.1);
+}
+.choice-btn.incorrect .choice-label { background: var(--danger); }
+.choice-btn.disabled { pointer-events: none; opacity: .7; }
+.choice-btn.disabled.show-correct {
+  border-color: var(--success);
+  opacity: 1;
+  background: rgba(72,187,120,.08);
+}
+
+/* Explanation */
+.explanation {
+  margin-top: 16px;
+  padding: 20px;
+  border-radius: var(--radius);
+  border-left: 4px solid var(--primary);
+  background: rgba(26,54,93,.04);
+  display: none;
+  animation: slideDown .3s ease;
+}
+.dark .explanation { background: rgba(255,255,255,.03); }
+.explanation.show { display: block; }
+.explanation h4 {
+  color: var(--primary);
+  margin-bottom: 8px;
+  font-size: .95rem;
+}
+.dark .explanation h4 { color: var(--gold); }
+.explanation p {
+  font-size: .9rem;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+/* Combo display */
+.combo-display {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 200;
+  pointer-events: none;
+  transition: all .3s;
+}
+.combo-badge {
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 12px rgba(246,173,85,.4);
+  animation: comboPulse .5s ease;
+  text-shadow: 0 1px 2px rgba(0,0,0,.3);
+}
+@keyframes comboPulse {
+  0% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+/* Next button */
+.next-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: all var(--transition);
+  display: none;
+}
+.next-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+.next-btn.show { display: block; }
+
+/* Feedback flash */
+.feedback-flash {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%) scale(0);
+  font-size: 4rem;
+  font-weight: 900;
+  z-index: 300;
+  pointer-events: none;
+  text-shadow: 0 2px 10px rgba(0,0,0,.2);
+}
+.feedback-flash.correct-flash {
+  color: var(--success);
+  animation: flashIn .6s ease forwards;
+}
+.feedback-flash.incorrect-flash {
+  color: var(--danger);
+  animation: flashIn .6s ease forwards;
+}
+@keyframes flashIn {
+  0% { transform: translate(-50%,-50%) scale(0); opacity: 1; }
+  50% { transform: translate(-50%,-50%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%,-50%) scale(1); opacity: 0; }
+}
+
+/* Level up modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-content {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  animation: modalIn .4s ease;
+  box-shadow: 0 20px 50px rgba(0,0,0,.3);
+}
+@keyframes modalIn {
+  0% { transform: scale(.5) rotate(-5deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+.modal-content .level-icon { font-size: 4rem; margin-bottom: 16px; }
+.modal-content h2 { font-size: 1.6rem; color: var(--gold-dark); margin-bottom: 8px; }
+.modal-content p { color: var(--text-muted); margin-bottom: 20px; }
+.modal-close-btn {
+  padding: 10px 32px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Timer */
+.timer-bar {
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.timer-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--danger), var(--gold));
+  transition: width .5s linear;
+  border-radius: 4px;
+}
+.timer-text {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--danger);
+  margin-bottom: 8px;
+}
+
+/* Progress bars in dashboard */
+.progress-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.progress-item:last-child { border-bottom: none; }
+.progress-name {
+  width: 180px;
+  font-size: .85rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.progress-bar {
+  flex: 1;
+  height: 10px;
+  background: var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--gold));
+  border-radius: 5px;
+  transition: width .6s ease;
+}
+.progress-pct {
+  width: 45px;
+  text-align: right;
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* Leitner box summary */
+.leitner-summary {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+  flex-wrap: wrap;
+}
+.leitner-box-stat {
+  flex: 1;
+  min-width: 60px;
+  text-align: center;
+  padding: 12px 8px;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 700;
+}
+.leitner-box-stat .box-num { font-size: 1.6rem; }
+.leitner-box-stat .box-label { font-size: .7rem; opacity: .9; }
+
+/* Settings */
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.setting-row:last-child { border-bottom: none; }
+.export-btn, .import-btn {
+  padding: 8px 20px;
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--primary);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: .85rem;
+  transition: all var(--transition);
+}
+.export-btn:hover, .import-btn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+.reset-btn {
+  padding: 8px 20px;
+  border: 2px solid var(--danger);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--danger);
+  cursor: pointer;
+  font-weight: 600;
+}
+.reset-btn:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* Results screen */
+.result-card {
+  text-align: center;
+  padding: 40px 24px;
+}
+.result-score {
+  font-size: 4rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--primary), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.result-detail {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0;
+}
+.result-item .r-num {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+.result-item .r-label {
+  font-size: .8rem;
+  color: var(--text-muted);
+}
+
+/* Confetti canvas */
+#confetti-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  pointer-events: none;
+}
+
+/* Animations */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: slideUp .4s ease; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .header-title { font-size: 1rem; }
+  .stat-badge { font-size: .75rem; padding: 3px 8px; }
+  .question-text { font-size: 1rem; }
+  .choice-btn { font-size: .9rem; padding: 12px 14px; }
+  .progress-name { width: 120px; font-size: .75rem; }
+  .dash-grid { grid-template-columns: 1fr 1fr; }
+  .result-detail { grid-template-columns: 1fr; gap: 8px; }
+  .mode-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+
+<!-- Header -->
+<header class="header" id="header">
+  <div class="header-title">
+    <span class="icon">⚓</span>
+    <span>海事代理士クイズ</span>
+  </div>
+  <div class="header-stats">
+    <div class="stat-badge">Lv.<span class="val" id="hdr-level">1</span></div>
+    <div class="stat-badge">XP <span class="val" id="hdr-xp">0</span></div>
+    <div class="stat-badge">🔥<span class="val" id="hdr-streak">0</span></div>
+    <div class="stat-badge" id="hdr-combo" style="display:none">x<span class="val" id="hdr-combo-val">1</span></div>
+    <button class="dark-toggle" id="dark-toggle" title="ダークモード切替">🌙</button>
+  </div>
+</header>
+<div class="xp-bar-wrap">
+  <div class="xp-bar-fill" id="xp-bar" style="width:0%"></div>
+</div>
+
+<!-- Navigation -->
+<nav class="nav">
+  <button class="nav-btn active" data-screen="dashboard">📊 ダッシュボード</button>
+  <button class="nav-btn" data-screen="mode-select">🎮 学習開始</button>
+  <button class="nav-btn" data-screen="progress">📈 進捗</button>
+  <button class="nav-btn" data-screen="settings">⚙️ 設定</button>
+</nav>
+
+<!-- Combo display -->
+<div class="combo-display" id="combo-display" style="display:none">
+  <div class="combo-badge" id="combo-badge"></div>
+</div>
+
+<!-- Feedback flash -->
+<div class="feedback-flash" id="feedback-flash"></div>
+
+<!-- Level up modal -->
+<div class="modal-overlay" id="levelup-modal">
+  <div class="modal-content">
+    <div class="level-icon">🎉</div>
+    <h2>レベルアップ！</h2>
+    <p id="levelup-text">レベル2に到達しました！</p>
+    <button class="modal-close-btn" onclick="closeLevelUp()">OK</button>
+  </div>
+</div>
+
+<!-- SCREENS -->
+
+<!-- Dashboard -->
+<div class="screen active" id="screen-dashboard">
+  <div class="container animate-in">
+    <div class="dash-grid">
+      <div class="card dash-stat">
+        <div class="num" id="dash-total">0</div>
+        <div class="label">総回答数</div>
+      </div>
+      <div class="card dash-stat">
+        <div class="num" id="dash-accuracy">0%</div>
+        <div class="label">正答率</div>
+      </div>
+      <div class="card dash-stat">
+        <div class="num" id="dash-mastered">0</div>
+        <div class="label">習得済み (Box5)</div>
+      </div>
+      <div class="card dash-stat">
+        <div class="num" id="dash-streak">0日</div>
+        <div class="label">連続学習</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:12px;">📦 レイトナーボックス</h3>
+      <div class="leitner-summary">
+        <div class="leitner-box-stat box-1"><div class="box-num" id="lb-1">0</div><div class="box-label">Box 1</div></div>
+        <div class="leitner-box-stat box-2"><div class="box-num" id="lb-2">0</div><div class="box-label">Box 2</div></div>
+        <div class="leitner-box-stat box-3"><div class="box-num" id="lb-3">0</div><div class="box-label">Box 3</div></div>
+        <div class="leitner-box-stat box-4"><div class="box-num" id="lb-4">0</div><div class="box-label">Box 4</div></div>
+        <div class="leitner-box-stat box-5"><div class="box-num" id="lb-5">0</div><div class="box-label">Box 5</div></div>
+      </div>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <p style="color:var(--text-muted); margin-bottom:16px;">さっそく学習を始めましょう！</p>
+      <button class="nav-btn active" style="font-size:1.1rem; padding:12px 32px;" onclick="switchScreen('mode-select')">🎮 学習開始</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mode Select -->
+<div class="screen" id="screen-mode-select">
+  <div class="container animate-in">
+    <h2 style="margin-bottom:16px;">学習モードを選択</h2>
+    <div class="mode-grid">
+      <div class="mode-card" onclick="startMode('weakness')">
+        <div class="mode-icon">🎯</div>
+        <div class="mode-name">弱点克服モード</div>
+        <div class="mode-desc">Box 1-2の問題を優先</div>
+      </div>
+      <div class="mode-card" onclick="startMode('random')">
+        <div class="mode-icon">🔀</div>
+        <div class="mode-name">ランダムモード</div>
+        <div class="mode-desc">全問題からランダム</div>
+      </div>
+      <div class="mode-card" onclick="showSubjectSelect()">
+        <div class="mode-icon">📚</div>
+        <div class="mode-name">科目別モード</div>
+        <div class="mode-desc">特定科目に集中</div>
+      </div>
+      <div class="mode-card" onclick="startMode('timeattack')">
+        <div class="mode-icon">⚡</div>
+        <div class="mode-name">タイムアタック</div>
+        <div class="mode-desc">5分で30問に挑戦</div>
+      </div>
+    </div>
+
+    <div id="subject-select-area" style="display:none;">
+      <h3 style="margin: 16px 0 8px;">科目を選択してください</h3>
+      <div class="subject-list" id="subject-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz -->
+<div class="screen" id="screen-quiz">
+  <div class="container animate-in">
+    <div id="timer-area" style="display:none;">
+      <div class="timer-text" id="timer-text">5:00</div>
+      <div class="timer-bar"><div class="timer-bar-fill" id="timer-bar-fill" style="width:100%"></div></div>
+    </div>
+    <div class="quiz-header">
+      <div class="quiz-progress" id="quiz-progress">1 / 20</div>
+      <div class="quiz-subject-tag" id="quiz-subject-tag">憲法</div>
+      <div class="quiz-difficulty" id="quiz-difficulty"></div>
+    </div>
+    <div class="question-card" id="question-card">
+      <div class="question-num" id="question-num">Q1</div>
+      <div class="leitner-box-tag" id="leitner-box-tag">Box 1</div>
+      <div class="question-text" id="question-text"></div>
+    </div>
+    <div class="choices" id="choices"></div>
+    <div class="explanation" id="explanation">
+      <h4>📖 解説</h4>
+      <p id="explanation-text"></p>
+    </div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">次の問題 →</button>
+  </div>
+</div>
+
+<!-- Results -->
+<div class="screen" id="screen-results">
+  <div class="container animate-in">
+    <div class="card result-card">
+      <h2 style="margin-bottom:8px;">セッション結果</h2>
+      <div class="result-score" id="result-score">80%</div>
+      <div class="result-detail">
+        <div class="result-item"><div class="r-num" id="res-correct" style="color:var(--success)">0</div><div class="r-label">正解</div></div>
+        <div class="result-item"><div class="r-num" id="res-wrong" style="color:var(--danger)">0</div><div class="r-label">不正解</div></div>
+        <div class="result-item"><div class="r-num" id="res-xp" style="color:var(--gold)">0</div><div class="r-label">獲得XP</div></div>
+      </div>
+      <button class="nav-btn active" style="padding:12px 32px; font-size:1rem;" onclick="switchScreen('mode-select')">もう一度</button>
+      <button class="nav-btn" style="padding:12px 32px; font-size:1rem; margin-left:8px;" onclick="switchScreen('dashboard')">ダッシュボード</button>
+    </div>
+  </div>
+</div>
+
+<!-- Progress -->
+<div class="screen" id="screen-progress">
+  <div class="container animate-in">
+    <div class="card">
+      <h3 style="margin-bottom:16px;">📈 科目別マスター率</h3>
+      <div id="progress-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="screen" id="screen-settings">
+  <div class="container animate-in">
+    <div class="card">
+      <h3 style="margin-bottom:16px;">⚙️ 設定</h3>
+      <div class="setting-row">
+        <span>学習データのエクスポート</span>
+        <button class="export-btn" onclick="exportData()">エクスポート</button>
+      </div>
+      <div class="setting-row">
+        <span>学習データのインポート</span>
+        <button class="import-btn" onclick="importData()">インポート</button>
+        <input type="file" id="import-file" accept=".json" style="display:none">
+      </div>
+      <div class="setting-row">
+        <span style="color:var(--danger)">全データリセット</span>
+        <button class="reset-btn" onclick="resetData()">リセット</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:8px;">ℹ️ 情報</h3>
+      <p style="font-size:.85rem; color:var(--text-muted); line-height:1.8;">
+        海事代理士試験対策クイズアプリ<br>
+        収録問題数: <strong id="info-total-q">0</strong>問 / 全20科目<br>
+        学習理論: Leitnerシステム（間隔反復）、インターリービング、テスト効果<br>
+        データはブラウザのlocalStorageに保存されます。
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// QUESTION DATABASE
+// ============================================================
+const QUESTIONS = [
+// 1. 憲法
+{id:1,s:"憲法",q:"日本国憲法において、国会は国権の最高機関であり、国の唯一の（　）機関であると規定されている。空欄に入る語句として正しいものはどれか。",c:["立法","行政","司法","外交"],a:0,e:"憲法第41条「国会は、国権の最高機関であつて、国の唯一の立法機関である」と規定されている。",d:1},
+{id:2,s:"憲法",q:"憲法第29条に規定する財産権について、正しいものはどれか。",c:["財産権は絶対不可侵であり、いかなる制限も受けない","財産権の内容は公共の福祉に適合するように法律で定められる","財産権は条約によってのみ制限できる","財産権の保障は日本国民にのみ適用される"],a:1,e:"憲法第29条第2項「財産権の内容は、公共の福祉に適合するやうに、法律でこれを定める」。私有財産の制限は公共の福祉の観点から法律によって可能である。",d:2},
+{id:3,s:"憲法",q:"次のうち、憲法上の基本的人権として「国務請求権（受益権）」に分類されるものはどれか。",c:["集会の自由","裁判を受ける権利","選挙権","生存権"],a:1,e:"裁判を受ける権利（第32条）は国務請求権（受益権）の一つ。集会の自由は自由権、選挙権は参政権、生存権は社会権に分類される。",d:2},
+{id:4,s:"憲法",q:"憲法第76条第3項において、裁判官はその良心に従い独立してその職権を行い、この憲法及び（　）にのみ拘束されると規定されている。",c:["条約","法律","命令","慣習法"],a:1,e:"憲法第76条第3項「すべて裁判官は、その良心に従ひ独立してその職権を行ひ、この憲法及び法律にのみ拘束される」。",d:1},
+{id:5,s:"憲法",q:"日本国憲法における衆議院の優越について、誤っているものはどれか。",c:["予算の先議権","内閣総理大臣の指名における優越","条約の承認における優越","最高裁判所長官の指名における優越"],a:3,e:"最高裁判所長官の指名は内閣が行う（第6条第2項）。衆議院の優越が認められるのは、予算先議権（第60条）、内閣総理大臣指名（第67条）、条約承認（第61条）、法律案議決（第59条）等である。",d:2},
+{id:6,s:"憲法",q:"憲法第25条が保障する権利として正しいものはどれか。",c:["教育を受ける権利","勤労の権利","生存権","財産権"],a:2,e:"憲法第25条第1項「すべて国民は、健康で文化的な最低限度の生活を営む権利を有する」。これが生存権の規定である。教育を受ける権利は第26条、勤労の権利は第27条。",d:1},
+{id:7,s:"憲法",q:"内閣が行う行為として、憲法上規定されていないものはどれか。",c:["条約の締結","政令の制定","法律案の提出","予算の作成"],a:2,e:"法律案の提出権は憲法上明文規定はないが、内閣法第5条により認められている。条約の締結（第73条3号）、政令の制定（第73条6号）、予算の作成（第73条5号）は憲法第73条に列挙されている。",d:3},
+
+// 2. 民法
+{id:8,s:"民法",q:"民法における意思表示の瑕疵について、詐欺による意思表示の取消しは善意でかつ過失がない第三者に対抗できるか。",c:["対抗できる","対抗できない","常に取り消せない","裁判所の許可があれば対抗できる"],a:1,e:"民法第96条第3項「詐欺による意思表示の取消しは、善意でかつ過失がない第三者に対抗することができない」。第三者保護規定である。",d:2},
+{id:9,s:"民法",q:"民法上、未成年者が法律行為をする場合に必要なものはどれか。",c:["裁判所の許可","法定代理人の同意","相手方の承諾","公正証書の作成"],a:1,e:"民法第5条第1項「未成年者が法律行為をするには、その法定代理人の同意を得なければならない」。ただし、単に権利を得る行為等は除く。",d:1},
+{id:10,s:"民法",q:"売買契約における瑕疵担保責任（契約不適合責任）について、買主が目的物の種類又は品質に関する不適合を知った時から何年以内にその旨を売主に通知しなければならないか。",c:["6か月","1年","2年","5年"],a:1,e:"民法第566条により、買主がその不適合を知った時から1年以内に売主に通知しなければ、契約不適合を理由とする担保責任を追及できない。",d:2},
+{id:11,s:"民法",q:"消滅時効について、債権者が権利を行使することができることを知った時から何年で時効消滅するか（主観的起算点）。",c:["3年","5年","10年","20年"],a:1,e:"民法第166条第1項第1号により、債権者が権利を行使することができることを知った時から5年で時効消滅する。客観的起算点では10年（同条同項第2号）。",d:2},
+{id:12,s:"民法",q:"不法行為に基づく損害賠償請求権の消滅時効期間（主観的起算点）は何年か。",c:["1年","3年","5年","10年"],a:1,e:"民法第724条第1号により、被害者又はその法定代理人が損害及び加害者を知った時から3年で時効消滅する。人の生命又は身体を害する場合は5年（第724条の2）。",d:2},
+{id:13,s:"民法",q:"留置権について正しいものはどれか。",c:["留置権者は目的物を使用することができる","留置権は物権であるが優先弁済権はない","留置権は登記がなければ第三者に対抗できない","留置権は動産にのみ認められる"],a:1,e:"留置権（民法第295条以下）は法定担保物権であり、他の債権者に対する優先弁済権はない。留置的効力のみを有する。不動産にも成立し、登記不要で対抗可能。",d:2},
+{id:14,s:"民法",q:"委任契約の当事者は、いつでも契約を解除することができるか。",c:["できない","相手方の同意が必要","いつでも解除できる","裁判所の許可が必要"],a:2,e:"民法第651条第1項「委任は、各当事者がいつでもその解除をすることができる」。ただし、相手方に不利な時期に解除した場合はやむを得ない事由がない限り損害賠償義務を負う。",d:1},
+{id:15,s:"民法",q:"抵当権の効力が及ぶ範囲として、正しいものはどれか。",c:["付加一体物には及ばない","従物には及ばない","付加一体物に及ぶ","債務者の全財産に及ぶ"],a:2,e:"民法第370条「抵当権は、抵当地の上に存する建物を除き、その目的である不動産に付加して一体となっている物に及ぶ」。",d:2},
+{id:16,s:"民法",q:"連帯債務者の一人に対する履行の請求は、他の連帯債務者に対して効力を生じるか（令和2年改正民法）。",c:["効力を生じる（絶対効）","効力を生じない（相対効）","債権者の選択による","裁判所が判断する"],a:1,e:"改正民法第441条により、連帯債務者の一人に対する履行の請求は、他の連帯債務者に対してその効力を生じない（相対効が原則）。ただし、別段の意思表示がある場合は除く。",d:3},
+{id:17,s:"民法",q:"賃貸借契約において、賃借人が賃貸人の承諾を得ずに第三者に転貸した場合、賃貸人は契約を解除できるか。",c:["常に解除できる","背信的行為と認めるに足りない特段の事情がない限り解除できる","賃貸人は解除できない","裁判所の許可が必要"],a:1,e:"民法第612条第2項により無断転貸は解除事由となるが、判例上、賃借人の行為が背信的行為と認めるに足りない特段の事情がある場合は解除できないとされている。",d:3},
+{id:18,s:"民法",q:"請負契約における請負人の担保責任について、注文者は目的物の種類又は品質に関する契約不適合を知った時から何年以内に通知しなければならないか。",c:["6か月","1年","3年","5年"],a:1,e:"民法第637条第1項により、注文者がその不適合を知った時から1年以内にその旨を請負人に通知しなければならない。",d:2},
+
+// 3. 商法
+{id:19,s:"商法",q:"商法上、船舶の衝突による損害賠償請求権の消滅時効は何年か。",c:["1年","2年","3年","5年"],a:1,e:"商法第789条により、船舶の衝突による損害賠償請求権は2年の消滅時効にかかる。",d:2},
+{id:20,s:"商法",q:"共同海損について正しいものはどれか。",c:["船舶のみの危険に対して行われる処分である","船舶及び積荷の共同の危険を免れるための処分から生じた損害・費用を利害関係者が分担する制度である","船主のみが負担する","積荷の保険で全額カバーされる"],a:1,e:"商法第766条以下に規定。共同海損とは、船舶及び積荷の共同の危険を免れるための船長の処分（投荷等）によって生じた損害及び費用を、各利害関係人が分担する制度である。",d:2},
+{id:21,s:"商法",q:"商法上の運送人の責任について、運送品の滅失・損傷の場合、荷受人が留保なく運送品を受け取った場合はどうなるか。",c:["運送人の責任は消滅しない","運送人の責任は消滅する（ただし隠れた損傷を除く）","保険会社に責任が移転する","荷送人の責任となる"],a:1,e:"商法第588条により、荷受人が留保なく運送品を受け取り運送賃を支払ったときは、運送人の責任は消滅する。ただし、直ちに発見できない損傷がある場合は2週間以内に通知すれば責任追及可能。",d:2},
+{id:22,s:"商法",q:"船舶所有者の責任制限制度について、正しいものはどれか。",c:["船舶所有者は常に無限責任を負う","船舶所有者は一定の金額を限度として責任を制限できる","船舶所有者は一切の責任を負わない","責任制限は旅客の死傷には適用されない"],a:1,e:"船舶の所有者等の責任の制限に関する法律により、船舶所有者等は一定の限度額まで責任を制限できる。これは海事法の国際的な制度である。",d:2},
+{id:23,s:"商法",q:"商法上、船長の権限として正しいものはどれか。",c:["船長は船舶所有者の許可なく船舶を売却できる","船長はやむを得ない場合、航海の途中で積荷を処分できる","船長は自由に航路を変更できる","船長は船員を懲戒する権限を持たない"],a:1,e:"商法第708条により、船長は航海に必要な場合、やむを得ない事由があるときは積荷を処分することができる。船舶の売却権限は原則としてない。",d:2},
+{id:24,s:"商法",q:"商行為によって生じた債務の消滅時効期間は原則として何年か。",c:["3年","5年","10年","20年"],a:1,e:"商法第522条は削除され、民法の一般原則が適用される。改正民法により、商行為によって生じた債権も権利行使可能時から5年（主観的起算点）で時効消滅する。",d:2},
+{id:25,s:"商法",q:"海上物品運送における運送人の責任期間について、正しいものはどれか。",c:["船積みから陸揚げまで","倉庫搬入から搬出まで","運送品の受取りから引渡しまで","契約締結から履行完了まで"],a:2,e:"商法第575条により、運送人の責任は運送品を受け取った時から引渡しまでの間に生じた損害について責任を負う。",d:2},
+
+// 4. 国土交通省設置法
+{id:26,s:"国土交通省設置法",q:"国土交通省設置法において、国土交通省の任務として規定されていないものはどれか。",c:["国土の総合的かつ体系的な利用","交通政策の推進","海上の安全の確保","通商産業の振興"],a:3,e:"国土交通省設置法第3条により、国土交通省は国土の利用・開発・保全、交通政策の推進、気象業務等を任務とする。通商産業の振興は経済産業省の所管。",d:1},
+{id:27,s:"国土交通省設置法",q:"地方運輸局の設置について正しいものはどれか。",c:["各都道府県に1つ設置","全国に10の地方運輸局が設置","全国に8の地方運輸局が設置","全国に5の地方運輸局が設置"],a:0,e:"地方運輸局は北海道、東北、関東、北陸信越、中部、近畿、中国、四国、九州、沖縄の各地域に設置されている（運輸監理部含む）。実務上は地方運輸局と運輸監理部（神戸）で構成。",d:2},
+{id:28,s:"国土交通省設置法",q:"国土交通省の外局として正しいものはどれか。",c:["海上保安庁と気象庁と観光庁","海上保安庁のみ","運輸安全委員会と海上保安庁","海上保安庁と気象庁"],a:0,e:"国土交通省設置法により、海上保安庁、気象庁、観光庁は国土交通省の外局として設置されている。運輸安全委員会も外局。",d:2},
+{id:29,s:"国土交通省設置法",q:"海事局の所掌事務として正しいものはどれか。",c:["航空機の安全基準の策定","船舶の安全及び船員に関する事務","道路の建設・管理","河川の整備"],a:1,e:"海事局は国土交通省の内部部局であり、船舶の安全、船員の労働条件、海上運送事業等に関する事務を所掌する。",d:1},
+{id:30,s:"国土交通省設置法",q:"海難審判所について正しいものはどれか。",c:["国土交通省の内部部局である","国土交通省に置かれる特別の機関である","法務省に設置されている","海上保安庁の一部門である"],a:1,e:"海難審判所は国土交通省に置かれる特別の機関であり、海難の原因究明・懲戒を行う。海上保安庁とは別の組織。",d:2},
+
+// 5. 船員法
+{id:31,s:"船員法",q:"船員法における船員の1日の労働時間の基準は何時間か。",c:["7時間","8時間","10時間","12時間"],a:1,e:"船員法第60条により、船員の1日の労働時間は8時間を基準とする。",d:1},
+{id:32,s:"船員法",q:"船員法において、船員が有給休暇を取得できるのは、連続勤務何か月からか。",c:["3か月","6か月","8か月","12か月"],a:1,e:"船員法第74条により、6か月間継続勤務した船員は有給休暇を取得する権利を有する。",d:1},
+{id:33,s:"船員法",q:"船員法上、雇入契約の届出はどこに行うか。",c:["海上保安庁","地方運輸局","国土交通大臣（実務上は地方運輸局長）","市町村役場"],a:2,e:"船員法第35条により、船舶所有者は雇入契約を締結した時は国土交通大臣に届け出なければならない。実務上は地方運輸局長等に届出を行う。",d:1},
+{id:34,s:"船員法",q:"船長の権限として船員法で認められていないものはどれか。",c:["在船義務を課す権限","航海中の懲戒権","船内犯罪の捜査権限","船員の給料を決定する権限"],a:3,e:"船長は在船義務（第12条）、懲戒権（第23条）、船内犯罪の処分権限等を有するが、給料の決定は雇用契約・労働協約等によるものであり船長の権限ではない。",d:2},
+{id:35,s:"船員法",q:"船員法における1週間の法定労働時間は何時間か。",c:["35時間","40時間","44時間","48時間"],a:1,e:"船員法第60条により、1週間の法定労働時間は基準労働期間を平均して40時間とされている。",d:1},
+{id:36,s:"船員法",q:"船員法上、18歳未満の者を船員として使用することについて正しいものはどれか。",c:["一切使用できない","午後8時から午前5時までの時間帯の労働が禁止されている","成年者と同様に制限なく使用できる","保護者の同意があれば制限なく使用できる"],a:1,e:"船員法第85条により、年少船員（18歳未満）の深夜労働（午後8時から午前5時まで）は原則禁止されている。",d:2},
+{id:37,s:"船員法",q:"船員法における災害補償として、船員が職務上の負傷又は疾病により療養する場合、船舶所有者は何を負担するか。",c:["療養費の半額","療養の全費用","標準報酬月額の6割","休業補償のみ"],a:1,e:"船員法第89条により、船舶所有者は療養に必要な一切の費用を負担しなければならない（療養補償）。労災保険とは別の船員法独自の制度。",d:2},
+{id:38,s:"船員法",q:"船員法において、船長は航海の安全のために必要な場合、船内にある者に対して命令を発することができるか。",c:["できない","船員に対してのみできる","船内にある者すべてに対してできる","海上保安庁の許可が必要"],a:2,e:"船員法第8条により、船長は航海の安全を確保するため船内にある者に対して必要な命令をすることができる。これは船員に限らず旅客等も含む。",d:2},
+{id:39,s:"船員法",q:"船員法上の船員に該当しない者はどれか。",c:["日本船舶に乗り組む船長","日本船舶に乗り組む機関長","総トン数5トン未満の船舶のみに乗り組む者","外国船舶に乗り組む日本人船員"],a:2,e:"船員法第1条第1項により「船員」とは日本船舶又は日本船舶以外の国土交通省令で定める船舶に乗り組む船長及び海員等をいうが、総トン数5トン未満の船舶のみに乗り組む者等は除かれる。",d:2},
+{id:40,s:"船員法",q:"船員法における有給休暇の日数は、6か月経過後最低何日か。",c:["10日","15日","20日","25日"],a:1,e:"船員法第74条の規定により、有給休暇は6か月継続勤務で15日が付与される。これは陸上の労働基準法（10日）より手厚い。",d:1},
+{id:41,s:"船員法",q:"船員法において、女性船員の坑内労働について正しいものはどれか。",c:["男性と同様に制限はない","全面的に禁止されている","妊産婦のみ禁止","船長の許可があれば可能"],a:0,e:"船員法では女性船員の坑内労働に関する規定は、陸上の労働基準法のような坑内労働禁止規定はない。船員法独自の保護規定として、妊娠中の女性船員の危険有害業務の制限等がある。",d:3},
+{id:42,s:"船員法",q:"船員が行方不明となった場合の死亡の認定について、船員法ではどのように規定しているか。",c:["行方不明から1か月で死亡と認定","行方不明から3か月で死亡と認定","行方不明の期間にかかわらず、相当の期間が経過した場合に死亡と推定","行方不明から1年で死亡と認定"],a:1,e:"船員法第93条により、船員が職務上行方不明となった場合、3か月間生死が不明のときは死亡したものと推定する。",d:2},
+
+// 6. 船員職業安定法
+{id:43,s:"船員職業安定法",q:"船員職業安定法の目的として正しいものはどれか。",c:["船員の最低賃金を定めること","船員の職業の安定を図ること","船舶の安全基準を定めること","船員の教育訓練を行うこと"],a:1,e:"船員職業安定法第1条により、同法は船員の職業の安定を図ることを目的とし、船員の職業紹介、船員の募集等について規定している。",d:1},
+{id:44,s:"船員職業安定法",q:"無料船員職業紹介事業を行うことができる者として正しいものはどれか。",c:["何人でも自由に行える","国土交通大臣の許可を受けた者","都道府県知事の許可を受けた者","船員労務官の許可を受けた者"],a:1,e:"船員職業安定法第34条により、無料船員職業紹介事業を行おうとする者は、国土交通大臣の許可を受けなければならない。",d:2},
+{id:45,s:"船員職業安定法",q:"船員の労働者派遣事業について正しいものはどれか。",c:["船員の労働者派遣は全面的に禁止されている","国土交通大臣の許可を受ければ行うことができる","届出制で行うことができる","厚生労働大臣の許可で行うことができる"],a:1,e:"船員職業安定法第45条により、船員派遣事業を行おうとする者は国土交通大臣の許可を受けなければならない。陸上の労働者派遣法とは別の体系。",d:2},
+{id:46,s:"船員職業安定法",q:"船員の募集について、文書募集を行う場合に必要な手続きはどれか。",c:["手続き不要","国土交通大臣への届出","国土交通大臣の許可","地方運輸局長の許可"],a:1,e:"船員職業安定法第28条により、文書募集を行う場合は国土交通大臣に届け出なければならない。",d:2},
+{id:47,s:"船員職業安定法",q:"有料船員職業紹介事業を行うために必要なものはどれか。",c:["届出","国土交通大臣の許可","都道府県知事の認可","海運局長の許可"],a:1,e:"船員職業安定法第32条により、有料船員職業紹介事業を行うには国土交通大臣の許可が必要である。",d:1},
+
+// 7. 船舶法
+{id:48,s:"船舶法",q:"船舶法における日本船舶の要件として正しくないものはどれか。",c:["日本国民の所有する船舶","日本の法令により設立された法人の所有する船舶","日本に住所を有する外国人の所有する船舶","日本の官庁又は公署の所有する船舶"],a:2,e:"船舶法第1条により日本船舶とは、(1)日本国民の所有する船舶、(2)日本の法令により設立された法人の所有する船舶、(3)日本の官庁又は公署の所有する船舶等である。外国人所有は該当しない。",d:1},
+{id:49,s:"船舶法",q:"船舶国籍証書の交付を受けるために必要な手続きはどれか。",c:["船舶の登記と船舶の登録","船舶の検査のみ","船舶保険の加入のみ","船員の雇入届出のみ"],a:0,e:"船舶法第5条により、船舶国籍証書の交付を受けるためには、まず船舶の登記を行い、次に管海官庁に船舶の登録を申請する必要がある。",d:1},
+{id:50,s:"船舶法",q:"仮船舶国籍証書について正しいものはどれか。",c:["有効期間は1年である","有効期間は6か月である","外国において日本船舶を取得した場合等に交付される","船舶国籍証書と同一の効力を永続的に有する"],a:2,e:"船舶法第12条により、仮船舶国籍証書は外国の港において日本船舶を取得した場合等に領事官等から交付される。有効期間は1年。",d:2},
+{id:51,s:"船舶法",q:"船舶法上、日本船舶が日本の国旗を掲げる義務が生じるのはどのような場合か。",c:["常時掲げなければならない","入港・出港時及び他の船舶に要求された場合","航海中のみ","国際航海に従事する場合のみ"],a:1,e:"船舶法第2条により、日本船舶は日本の国旗を掲げる権利を有し、法律又は慣習による場合にこれを掲げなければならない。",d:2},
+{id:52,s:"船舶法",q:"総トン数20トン未満の船舶について、船舶法上の登記・登録義務はあるか。",c:["登記・登録とも義務がある","登記義務はないが登録義務がある","登記義務はあるが登録義務はない","登記・登録とも義務がない"],a:3,e:"船舶法第20条により、総トン数20トン未満の船舶は登記・登録の義務がない（適用除外）。ただし、管海官庁に届け出て総トン数の測度を受ける必要がある場合がある。",d:2},
+{id:53,s:"船舶法",q:"船舶法第1条に定める日本船舶に該当する法人要件として、代表者の全員が日本国民であることが必要か。",c:["必要である","必要ではない","代表者の過半数が日本国民であればよい","代表者の3分の2以上が日本国民であればよい"],a:1,e:"船舶法第1条第2号により日本船舶となるのは「日本の法令により設立された法人」であり、代表者の国籍要件は定められていない。",d:2},
+{id:54,s:"船舶法",q:"船舶国籍証書に記載すべき事項として規定されていないものはどれか。",c:["船舶の名称","船籍港","船舶所有者の住所・氏名","船員の名簿"],a:3,e:"船舶法施行細則により、船舶国籍証書には船舶の名称、種類、船籍港、総トン数、船舶所有者等が記載される。船員の名簿は記載事項ではない。",d:1},
+
+// 8. 船舶安全法
+{id:55,s:"船舶安全法",q:"船舶安全法上の船舶検査の種類として正しくないものはどれか。",c:["定期検査","中間検査","臨時検査","予備検査"],a:3,e:"船舶安全法第5条により、船舶検査には定期検査、中間検査、臨時検査、臨時航行検査、特別検査がある。「予備検査」という名称の検査はない。",d:1},
+{id:56,s:"船舶安全法",q:"船舶検査証書の有効期間は原則として何年か。",c:["1年","3年","5年","6年"],a:2,e:"船舶安全法第10条により、船舶検査証書の有効期間は5年とされている（旅客船は6年）。ただし、定期検査の合格により更新される。",d:1},
+{id:57,s:"船舶安全法",q:"臨時検査が必要となる場合として正しいものはどれか。",c:["毎年1回定期的に行われる","船舶の改造又は修理を行った場合","船長が交替した場合","船員数が変更になった場合"],a:1,e:"船舶安全法第5条第1項第3号により、船舶の改造又は修理を行った場合や、船舶の設備に変更を生じた場合等に臨時検査を受けなければならない。",d:1},
+{id:58,s:"船舶安全法",q:"船舶安全法上、船舶検査を行う機関はどれか。",c:["海上保安庁","管海官庁（地方運輸局長等）","海難審判所","船級協会のみ"],a:1,e:"船舶安全法第6条により、船舶検査は管海官庁（国土交通大臣、実務上は地方運輸局長等）が行う。日本海事協会等の船級協会は検査の代行が認められている。",d:1},
+{id:59,s:"船舶安全法",q:"満載喫水線について正しいものはどれか。",c:["全ての船舶に適用される","国際航海に従事する長さ24メートル以上の船舶に適用される","旅客船にのみ適用される","タンカーにのみ適用される"],a:1,e:"船舶安全法第3条及び満載喫水線規則により、国際航海に従事する長さ24メートル以上の船舶は満載喫水線を標示しなければならない。",d:2},
+{id:60,s:"船舶安全法",q:"船舶安全法における中間検査の時期はどのように定められているか。",c:["毎年実施","定期検査と定期検査の間に実施","船長が必要と認めた時に実施","5年ごとに実施"],a:1,e:"船舶安全法第5条第1項第2号により、中間検査は定期検査と次の定期検査との間において国土交通省令で定める時期に行われる。",d:1},
+{id:61,s:"船舶安全法",q:"船舶安全法が適用されない船舶はどれか。",c:["貨物船","漁船","ろかい舟","旅客船"],a:2,e:"船舶安全法第2条により、ろかいのみをもって運転するもの等は適用除外とされている。",d:1},
+{id:62,s:"船舶安全法",q:"船舶安全法上、無線設備の備え付けが義務付けられる船舶の基準として正しいものはどれか。",c:["全ての船舶","総トン数300トン以上の国際航海船舶","旅客船及び総トン数一定以上の船舶","タンカーのみ"],a:2,e:"船舶安全法及び船舶設備規程により、旅客船及び一定のトン数以上の船舶は無線設備の備え付けが義務付けられている。GMDSS（全世界的な海上遭難安全システム）への対応も必要。",d:2},
+
+// 9. 船舶のトン数の測度に関する法律
+{id:63,s:"船舶のトン数の測度に関する法律",q:"国際総トン数の測度の基準となる条約はどれか。",c:["SOLAS条約","1969年の船舶のトン数の測度に関する国際条約","MARPOL条約","STCW条約"],a:1,e:"「船舶のトン数の測度に関する法律」は1969年の船舶のトン数の測度に関する国際条約（TM条約）を国内法化したものである。",d:1},
+{id:64,s:"船舶のトン数の測度に関する法律",q:"国際トン数証書の有効期間について正しいものはどれか。",c:["1年","3年","5年","有効期間の定めはない"],a:3,e:"国際トン数証書には有効期間の定めはなく、船舶の主要な改造がない限り効力を有する。ただし、変更があった場合は再測度が必要。",d:2},
+{id:65,s:"船舶のトン数の測度に関する法律",q:"総トン数と純トン数の関係について正しいものはどれか。",c:["純トン数は常に総トン数より大きい","純トン数は総トン数の半分と定められている","純トン数は総トン数以下である","両者は同じ値である"],a:2,e:"純トン数は船舶の有用な容積を基に算出され、総トン数（船舶全体の容積）以下の値となる。純トン数は0.30×総トン数を下回らないものとされている。",d:2},
+{id:66,s:"船舶のトン数の測度に関する法律",q:"船舶のトン数の測度は誰が行うか。",c:["船舶所有者","管海官庁（国土交通大臣）","海上保安庁","船級協会"],a:1,e:"船舶のトン数の測度に関する法律第4条により、船舶のトン数の測度は国土交通大臣（管海官庁）が行う。",d:1},
+{id:67,s:"船舶のトン数の測度に関する法律",q:"総トン数の算定方法について正しいものはどれか。",c:["船舶の排水量を基に算定する","船舶の載貨能力を基に算定する","船舶の閉囲場所の容積を基に算定する","船舶の全長を基に算定する"],a:2,e:"船舶のトン数の測度に関する法律により、総トン数は船舶の全ての閉囲場所の容積を基に、所定の計算式により算定される。",d:2},
+
+// 10. 造船法
+{id:68,s:"造船法",q:"造船法上、船舶の製造（新造）を行う場合に必要な手続きはどれか。",c:["届出","国土交通大臣の許可","都道府県知事の許可","手続き不要"],a:1,e:"造船法第3条により、一定のトン数以上の鋼製船舶の製造を行うには国土交通大臣の許可が必要である。",d:1},
+{id:69,s:"造船法",q:"造船法の目的として正しいものはどれか。",c:["船員の育成","造船業の合理的な発展を図ること","海上交通の安全確保","船舶の国籍管理"],a:1,e:"造船法第1条により、造船業の合理的な発展を図ることを目的としている。",d:1},
+{id:70,s:"造船法",q:"造船施設の新設・変更について正しいものはどれか。",c:["届出で足りる","国土交通大臣の許可が必要","都道府県知事の許可が必要","手続き不要"],a:0,e:"造船法第6条により、造船施設の新設・増設・変更は国土交通大臣への届出が必要とされている。",d:2},
+{id:71,s:"造船法",q:"造船法で許可が必要となる船舶の改造とはどのようなものか。",c:["すべての改造","総トン数の変更を伴う大規模な改造","塗装のやり直し","船名の変更"],a:1,e:"造船法により、船舶の大規模な改造（総トン数の変更を伴うもの等）には国土交通大臣の許可が必要。軽微な修繕等は対象外。",d:2},
+
+// 11. 港湾法
+{id:72,s:"港湾法",q:"港湾管理者になることができるのはどれか。",c:["国のみ","地方公共団体又はそれが設立する港務局","民間企業","海上保安庁"],a:1,e:"港湾法第2条により、港湾管理者は地方公共団体（都道府県・市町村）又はこれらが設立する港務局である。国は港湾管理者にはなれない。",d:1},
+{id:73,s:"港湾法",q:"港湾区域について正しいものはどれか。",c:["国土交通大臣が一方的に指定する","港湾管理者が定め、国土交通大臣の認可を受ける","海上保安庁長官が指定する","都道府県知事が指定する"],a:1,e:"港湾法第4条により、港湾管理者は港湾区域を定め、国土交通大臣の認可を受けなければならない。",d:2},
+{id:74,s:"港湾法",q:"臨港地区について正しいものはどれか。",c:["港湾区域と同一の範囲である","港湾の管理運営に必要な陸域を対象とする","海域のみを対象とする","漁港のみに設定される"],a:1,e:"港湾法第38条以下により、臨港地区は港湾の管理運営に必要な陸域部分を対象として都市計画に定められる地区である。港湾区域は水域を対象とする。",d:2},
+{id:75,s:"港湾法",q:"重要港湾の指定は誰が行うか。",c:["国土交通大臣","都道府県知事","港湾管理者","内閣総理大臣"],a:0,e:"港湾法第2条第2項により、重要港湾は国土交通大臣が政令で指定する（国際戦略港湾・国際拠点港湾は別途政令指定）。",d:1},
+{id:76,s:"港湾法",q:"港湾法上、港湾施設に含まれないものはどれか。",c:["防波堤","岸壁","航路標識","荷さばき施設"],a:2,e:"航路標識は航路標識法に基づくものであり、港湾法上の港湾施設には水域施設、外郭施設、係留施設、荷さばき施設等が含まれる。",d:2},
+
+// 12. 海上交通安全法
+{id:77,s:"海上交通安全法",q:"海上交通安全法で定められている航路の数はいくつか。",c:["8航路","10航路","11航路","12航路"],a:2,e:"海上交通安全法で定める航路は、浦賀水道航路、中ノ瀬航路、伊良湖水道航路、明石海峡航路、備讃瀬戸東航路、宇高東航路、宇高西航路、備讃瀬戸北航路、備讃瀬戸南航路、水島航路、来島海峡航路の11航路である。",d:1},
+{id:78,s:"海上交通安全法",q:"巨大船の定義として正しいものはどれか。",c:["総トン数1万トン以上の船舶","長さ200メートル以上の船舶","長さ300メートル以上の船舶","総トン数5万トン以上の船舶"],a:1,e:"海上交通安全法第2条第2項により、巨大船とは長さ200メートル以上の船舶をいう。",d:1},
+{id:79,s:"海上交通安全法",q:"航路における一般的な航法として正しいものはどれか。",c:["航路の左側を航行する","航路の右側を航行する","航路の中央を航行する","航路の端を航行する"],a:1,e:"海上交通安全法第3条により、航路をこれに沿って航行する船舶は、できる限りその航路の右側を航行しなければならない。",d:1},
+{id:80,s:"海上交通安全法",q:"海上交通安全法が適用される海域はどこか。",c:["日本の領海全域","東京湾、伊勢湾、瀬戸内海及びその付近の海域","太平洋沿岸のみ","港湾区域のみ"],a:1,e:"海上交通安全法は東京湾、伊勢湾及び瀬戸内海等の船舶交通がふくそうする海域に適用される。",d:1},
+{id:81,s:"海上交通安全法",q:"来島海峡航路における特別な航法は何か。",c:["右側通行","左側通行","順潮時と逆潮時で通航方向が異なる（潮流信号に従う）","一方通行"],a:2,e:"来島海峡航路では潮流の影響が大きいため、順中逆西の原則が適用され、潮流信号に従って航行方向が定められる。これは他の航路にない特別な航法である。",d:2},
+{id:82,s:"海上交通安全法",q:"巨大船が航路を航行しようとする場合、事前に何を行わなければならないか。",c:["海上保安庁長官に届出","海上保安庁長官に通報","管海官庁に届出","何も不要"],a:1,e:"海上交通安全法第22条により、巨大船は航路を航行しようとする場合、あらかじめ海上保安庁長官に通報しなければならない。",d:2},
+{id:83,s:"海上交通安全法",q:"海上交通安全法上、航路内で原則として禁止されている行為はどれか。",c:["航行","錨泊","信号の発信","レーダーの使用"],a:1,e:"海上交通安全法第10条により、航路内においては原則として錨泊（びょう泊）が禁止されている。やむを得ない場合等を除く。",d:1},
+
+// 13. 港則法
+{id:84,s:"港則法",q:"港則法における「特定港」とは何か。",c:["国際航海船舶が入港できる港","政令で定める喫水の深い船舶が出入りする港","全ての港","漁港のみ"],a:1,e:"港則法第3条第2項により、特定港とは政令で定める喫水の深い船舶が出入できる港又は外国船舶が常時出入する港をいう。",d:1},
+{id:85,s:"港則法",q:"特定港に入港した船舶の義務として正しいものはどれか。",c:["入港届を税関に提出する","入港後24時間以内に港長に届け出る","入港届の提出は不要","入港後48時間以内に届け出る"],a:1,e:"港則法第4条により、船舶は特定港に入港したときは入港後24時間以内に港長に届け出なければならない（一定の例外あり）。",d:1},
+{id:86,s:"港則法",q:"港則法における港長の権限として正しいものはどれか。",c:["港湾施設の建設","船舶の交通整理","関税の徴収","船員の雇用管理"],a:1,e:"港則法により、港長は港内における船舶交通の安全と港内の整頓のために、船舶の交通整理、錨地の指定等の権限を有する。",d:1},
+{id:87,s:"港則法",q:"港則法上、危険物の荷役を行う場合に必要な手続きはどれか。",c:["特に手続き不要","港長の許可","海上保安庁長官の許可","国土交通大臣の許可"],a:1,e:"港則法第23条により、特定港において危険物の荷役をしようとする者は港長の許可を受けなければならない。",d:1},
+{id:88,s:"港則法",q:"港則法上、船舶が港内で停泊する場合の義務として正しいものはどれか。",c:["任意の場所に停泊できる","港長の指定した場所に停泊しなければならない","入港順に停泊場所が決まる","出港時間を港長に届け出る義務のみ"],a:1,e:"港則法第5条により、船舶は港長の指定した場所に錨泊・停泊しなければならない。港内の秩序維持のための規定である。",d:1},
+{id:89,s:"港則法",q:"港則法において、港内での船舶の最高速度について正しいものはどれか。",c:["時速10ノット以下","時速12ノット以下","他の船舶に危険を及ぼさないような速力","速度制限の規定はない"],a:2,e:"港則法第16条により、港内においては他の船舶に危険を及ぼさないような速力で航行しなければならない。具体的な数値ではなく相対的基準。",d:2},
+{id:90,s:"港則法",q:"港則法が適用される港はどのように定められるか。",c:["国土交通省令で定める","政令で定める","法律で直接定める","港湾管理者が定める"],a:0,e:"港則法第2条により、同法が適用される港は国土交通省令で定められる。",d:2},
+
+// 14. 海洋汚染等及び海上災害の防止に関する法律
+{id:91,s:"海洋汚染等及び海上災害の防止に関する法律",q:"海洋汚染防止法上、船舶から海洋に油を排出することは原則としてどうなっているか。",c:["自由に排出できる","原則として禁止されている","一定量まで排出できる","沿岸から12海里以遠であれば排出できる"],a:1,e:"海洋汚染等及び海上災害の防止に関する法律第4条により、何人も海域において船舶から油を排出してはならない（原則禁止）。例外として一定の基準を満たす場合のみ排出可能。",d:1},
+{id:92,s:"海洋汚染等及び海上災害の防止に関する法律",q:"有害液体物質をばら積みで運送する船舶について正しいものはどれか。",c:["有害液体物質汚染防止緊急措置手引書を備え置かなければならない","特に規制はない","油と同じ基準が適用される","港湾区域内のみ規制される"],a:0,e:"海防法第9条の4により、有害液体物質をばら積みで運送する船舶は有害液体物質汚染防止緊急措置手引書を船内に備え置かなければならない。",d:2},
+{id:93,s:"海洋汚染等及び海上災害の防止に関する法律",q:"船舶から廃棄物を海洋に排出することについて正しいものはどれか。",c:["全面的に禁止されている","原則禁止だが一定の条件の下で排出できるものがある","自由に排出できる","沖合50海里以遠であれば自由に排出できる"],a:1,e:"海防法第10条により船舶からの廃棄物の海洋排出は原則禁止であるが、政令で定める廃棄物について一定の基準に従って排出する場合は例外として認められている。",d:2},
+{id:94,s:"海洋汚染等及び海上災害の防止に関する法律",q:"油が排出された場合の船長の義務として正しいものはどれか。",c:["直ちに引き返す義務","排出の日時・場所・状況等を最寄りの海上保安庁の事務所に通報する義務","排出後24時間以内に報告する義務","保険会社に連絡する義務"],a:1,e:"海防法第38条により、船舶から油が排出された場合、船長は直ちにその排出の日時・場所・量・原因等を最寄りの海上保安庁の事務所に通報しなければならない。",d:1},
+{id:95,s:"海洋汚染等及び海上災害の防止に関する法律",q:"MARPOL条約（船舶による汚染の防止のための国際条約）に対応する日本の国内法はどれか。",c:["船舶安全法","海洋汚染等及び海上災害の防止に関する法律","港則法","海上交通安全法"],a:1,e:"MARPOL条約の国内担保法は「海洋汚染等及び海上災害の防止に関する法律」（海防法）である。油・有害液体物質・廃棄物・大気汚染物質等の排出規制を定めている。",d:1},
+{id:96,s:"海洋汚染等及び海上災害の防止に関する法律",q:"船舶からの大気汚染物質の放出規制について正しいものはどれか。",c:["規制はない","窒素酸化物・硫黄酸化物等の放出が規制されている","二酸化炭素のみ規制されている","港湾区域内のみ規制される"],a:1,e:"海防法第19条の3以下により、船舶の原動機から放出される窒素酸化物（NOx）及び燃料油中の硫黄酸化物（SOx）等の放出が規制されている。MARPOL条約附属書VIに対応。",d:2},
+
+// 15. 領海等における外国船舶の航行に関する法律
+{id:97,s:"領海等における外国船舶の航行に関する法律",q:"日本の領海の幅は基線から何海里か。",c:["3海里","6海里","12海里","200海里"],a:2,e:"領海及び接続水域に関する法律第1条により、日本の領海は基線から12海里までの海域である。",d:1},
+{id:98,s:"領海等における外国船舶の航行に関する法律",q:"外国船舶が日本の領海を無害通航する場合の義務として正しいものはどれか。",c:["事前に許可を得る義務","継続的かつ迅速な通航を行う義務","日本語での通信義務","日本の水先人を乗船させる義務"],a:1,e:"国連海洋法条約及び国内法により、無害通航は継続的かつ迅速に行わなければならない。停船や錨泊は通常の航海に付随する場合等を除き認められない。",d:1},
+{id:99,s:"領海等における外国船舶の航行に関する法律",q:"領海等における外国船舶の航行に関する法律において、外国船舶が領海内で行ってはならない行為はどれか。",c:["航行すること","無害でない通航","漁ろう活動のみ","何も制限されていない"],a:1,e:"同法により、外国船舶は日本の平和・秩序又は安全を害する活動を行う通航（無害でない通航）をしてはならない。漁ろう活動、調査活動、武器の練習等が例示されている。",d:2},
+{id:100,s:"領海等における外国船舶の航行に関する法律",q:"外国船舶が日本の内水に入る場合について正しいものはどれか。",c:["無害通航権がそのまま適用される","沿岸国の同意なく航行できる","沿岸国の同意が必要（通常は開港に限り入港可能）","いかなる場合も入域できない"],a:2,e:"内水においては外国船舶に無害通航権は認められず、原則として沿岸国（日本）の同意が必要である。通常は開港している港に限り入港が認められる。",d:2},
+
+// 16. 内航海運業法
+{id:101,s:"内航海運業法",q:"内航海運業を営もうとする者が行うべき手続きはどれか。",c:["国土交通大臣の免許","国土交通大臣への届出（登録）","都道府県知事の許可","地方運輸局長の許可"],a:1,e:"内航海運業法第3条により、内航海運業を営もうとする者は国土交通大臣に届出（登録）をしなければならない。従来の許可制から届出制（登録制）に改められた。",d:1},
+{id:102,s:"内航海運業法",q:"内航海運業法における「内航運送」の定義として正しいものはどれか。",c:["日本国内の港間における船舶による物品の運送","国際航海における物品の運送","河川における物品の運送のみ","旅客の運送を含む"],a:0,e:"内航海運業法第2条により、内航運送とは本邦の各港間における船舶による物品の運送をいう。旅客の運送は含まない（旅客は海上運送法で規定）。",d:1},
+{id:103,s:"内航海運業法",q:"内航運送取扱業とはどのような事業か。",c:["自ら船舶を運航して運送する事業","荷主と運送業者の間に立って運送の取次ぎ等を行う事業","船舶の修繕を行う事業","船員を派遣する事業"],a:1,e:"内航海運業法第2条第4項により、内航運送取扱業は荷主の需要に応じ、船舶運航事業者の行う内航運送を利用して物品の運送を行う事業（利用運送）等をいう。",d:2},
+{id:104,s:"内航海運業法",q:"内航海運業法上、事業計画の変更について正しいものはどれか。",c:["自由に変更できる","国土交通大臣への届出が必要","国土交通大臣の認可が必要","変更は認められない"],a:1,e:"内航海運業法により、事業計画に変更があった場合は国土交通大臣に届け出なければならない。",d:1},
+{id:105,s:"内航海運業法",q:"内航海運業法の対象となる船舶の範囲について正しいものはどれか。",c:["全ての船舶","総トン数100トン以上又は長さ30メートル以上の船舶","総トン数500トン以上の船舶のみ","旅客船を含む全船舶"],a:1,e:"内航海運業法施行規則により、対象となる船舶は総トン数100トン以上又は長さ30メートル以上の船舶（ただし政令で定めるものを除く）とされている。",d:2},
+
+// 17. 国際航海船舶及び国際港湾施設の保安の確保等に関する法律（ISPS）
+{id:106,s:"国際船舶・港湾保安法",q:"ISPS法（国際船舶・港湾保安法）の目的として正しいものはどれか。",c:["海上交通の安全確保","国際航海船舶及び国際港湾施設の保安の確保","海洋環境の保護","船員の労働条件の改善"],a:1,e:"国際航海船舶及び国際港湾施設の保安の確保等に関する法律（ISPS法）は、テロ等の脅威に対して国際航海船舶及び国際港湾施設の保安を確保することを目的とする。",d:1},
+{id:107,s:"国際船舶・港湾保安法",q:"船舶保安計画について正しいものはどれか。",c:["全ての船舶に必要","国際航海船舶に作成・承認が義務付けられている","任意で作成するものである","港湾管理者が作成する"],a:1,e:"ISPS法により、国際航海船舶は船舶保安計画を作成し、国土交通大臣の承認を受けなければならない。ISPSコード（国際船舶・港湾施設保安コード）に基づく。",d:1},
+{id:108,s:"国際船舶・港湾保安法",q:"保安レベルは何段階に分けられているか。",c:["2段階","3段階","4段階","5段階"],a:1,e:"ISPS法及びISPSコードにより、保安レベルはレベル1（通常）、レベル2（高められた）、レベル3（例外的な）の3段階に分けられている。",d:1},
+{id:109,s:"国際船舶・港湾保安法",q:"国際航海船舶の定義として正しいものはどれか。",c:["国内のみを航海する船舶","国際航海に従事する旅客船及び総トン数500トン以上の貨物船","全ての商船","軍艦を含む全ての船舶"],a:1,e:"ISPS法第2条により、国際航海船舶とは国際航海に従事する旅客船及び総トン数500トン以上の貨物船をいう（軍艦等は除く）。",d:2},
+{id:110,s:"国際船舶・港湾保安法",q:"船舶保安統括者の選任義務について正しいものはどれか。",c:["全ての船舶に選任義務がある","国際航海船舶ごとに選任しなければならない","船舶保安統括者は会社に1人置けばよい","選任は任意である"],a:1,e:"ISPS法により、国際航海船舶の船舶所有者は各船舶ごとに船舶保安統括者を選任しなければならない。保安管理体制の中核を担う者である。",d:2},
+
+// 18. 海上運送法
+{id:111,s:"海上運送法",q:"一般旅客定期航路事業を営もうとする者が行うべき手続きはどれか。",c:["届出","国土交通大臣の許可","国土交通大臣の認可","登録"],a:1,e:"海上運送法第3条により、一般旅客定期航路事業を営もうとする者は国土交通大臣の許可を受けなければならない。旅客の安全確保の観点から許可制となっている。",d:1},
+{id:112,s:"海上運送法",q:"不定期航路事業について正しいものはどれか。",c:["許可制である","届出制である","免許制である","規制はない"],a:1,e:"海上運送法第20条により、不定期航路事業（旅客の運送を行うもの）を営もうとする者は国土交通大臣に届け出なければならない。定期航路事業の許可制と比べ緩やかな規制。",d:1},
+{id:113,s:"海上運送法",q:"海上運送法が適用される運送の対象はどれか。",c:["物品の運送のみ","旅客の運送のみ","旅客又は物品の運送","旅客の運送に限定"],a:2,e:"海上運送法は船舶運航事業者が行う旅客又は物品の海上運送に関する規制を定めている。物品のみの運送（内航）は内航海運業法が主に適用される。",d:2},
+{id:114,s:"海上運送法",q:"旅客定期航路事業者の運賃について正しいものはどれか。",c:["自由に設定できる","国土交通大臣への届出が必要","国土交通大臣の認可が必要","都道府県知事の承認が必要"],a:1,e:"海上運送法により、一般旅客定期航路事業者は運賃・料金を定め国土交通大臣に届け出なければならない（届出制に改正された）。",d:2},
+{id:115,s:"海上運送法",q:"船舶運航事業者が運航を休止又は廃止する場合に必要な手続きはどれか。",c:["手続き不要","事前に国土交通大臣に届け出る","国土交通大臣の許可が必要","利用者の同意が必要"],a:1,e:"海上運送法により、一般旅客定期航路事業者は事業の休止又は廃止をしようとするときは、あらかじめ国土交通大臣に届け出なければならない。",d:1},
+{id:116,s:"海上運送法",q:"海上運送法において、日本船舶以外の船舶による本邦の各港間の旅客運送（カボタージュ）は原則としてどうなっているか。",c:["自由に行える","原則として禁止されている","届出制で認められる","国際条約により認められている"],a:1,e:"海上運送法第3条等により、本邦の各港間における旅客運送（カボタージュ）は原則として日本船舶によらなければならない。外国船舶によるカボタージュは原則禁止。",d:2},
+
+// 19. 船舶職員及び小型船舶操縦者法
+{id:117,s:"船舶職員及び小型船舶操縦者法",q:"海技免許の種類として正しいものはどれか。",c:["1級から5級の5段階","甲種と乙種の2種類","航海・機関・通信等の区分がある","国際免許と国内免許の2種類"],a:2,e:"船舶職員及び小型船舶操縦者法第4条により、海技免許は航海（1級〜6級）、機関（1級〜6級）、通信・電子通信等の区分がある。",d:1},
+{id:118,s:"船舶職員及び小型船舶操縦者法",q:"海技免状の有効期間は何年か。",c:["3年","5年","10年","有効期間の定めなし"],a:1,e:"船舶職員及び小型船舶操縦者法第7条により、海技免状の有効期間は5年である。更新には更新講習の受講等が必要。",d:1},
+{id:119,s:"船舶職員及び小型船舶操縦者法",q:"小型船舶操縦免許の種類として正しいものはどれか。",c:["1級と2級のみ","1級、2級及び特殊","甲種と乙種","A級とB級"],a:1,e:"船舶職員及び小型船舶操縦者法により、小型船舶操縦免許は1級、2級及び特殊（水上オートバイ等）の3種類がある。",d:1},
+{id:120,s:"船舶職員及び小型船舶操縦者法",q:"乗組み基準について正しいものはどれか。",c:["船舶所有者が自由に決定できる","船舶の大きさ・航行区域等に応じて法定されている","船長の裁量で決定される","船級協会が決定する"],a:1,e:"船舶職員及び小型船舶操縦者法第18条以下により、乗組み基準（配乗基準）は船舶の大きさ、航行区域、推進機関の出力等に応じて省令で定められている。",d:1},
+{id:121,s:"船舶職員及び小型船舶操縦者法",q:"海技士の免許を受けることができる年齢の要件として正しいものはどれか。",c:["16歳以上","18歳以上","20歳以上","年齢制限なし"],a:1,e:"船舶職員及び小型船舶操縦者法第5条により、海技免許を受けるには18歳以上であることが必要（6級海技士は一部17歳9か月）。",d:2},
+{id:122,s:"船舶職員及び小型船舶操縦者法",q:"海技試験に合格しても海技免許を与えられない事由として正しいものはどれか。",c:["外国に居住している場合","心身の障害により業務を適正に行えない場合","大型船舶に乗船経験がない場合","年齢が60歳以上の場合"],a:1,e:"船舶職員及び小型船舶操縦者法第5条により、心身の障害により船舶職員としての業務を適正に行うことができない者には免許を与えないことがある（欠格事由）。",d:2},
+
+// 20. 港湾運送事業法
+{id:123,s:"港湾運送事業法",q:"港湾運送事業を営もうとする者が行うべき手続きはどれか。",c:["届出","国土交通大臣の許可","都道府県知事の許可","登録"],a:1,e:"港湾運送事業法第4条により、港湾運送事業を営もうとする者は国土交通大臣の許可を受けなければならない。",d:1},
+{id:124,s:"港湾運送事業法",q:"港湾運送事業の種類として規定されていないものはどれか。",c:["一般港湾運送事業","船内荷役事業","はしけ運送事業","旅客運送事業"],a:3,e:"港湾運送事業法第2条により、港湾運送事業には一般港湾運送事業、船内荷役事業、はしけ運送事業、沿岸荷役事業、いかだ運送事業等がある。旅客運送は含まない。",d:1},
+{id:125,s:"港湾運送事業法",q:"港湾運送事業法における料金について正しいものはどれか。",c:["自由に設定できる","国土交通大臣への届出が必要","国土交通大臣の認可が必要","港湾管理者の承認が必要"],a:1,e:"港湾運送事業法の改正により、港湾運送の料金は届出制となっている。事業者は料金を定め国土交通大臣に届け出なければならない。",d:2},
+{id:126,s:"港湾運送事業法",q:"港湾運送事業法が適用される港はどれか。",c:["全ての港","政令で定める港湾","特定港のみ","重要港湾のみ"],a:1,e:"港湾運送事業法第2条により、同法が適用されるのは政令で定める港湾において行われる港湾運送である。全ての港に適用されるわけではない。",d:2},
+{id:127,s:"港湾運送事業法",q:"沿岸荷役事業とはどのような事業か。",c:["船舶内における貨物の積み卸し","はしけによる運送","港湾の沿岸において荷さばき等を行う事業","沿岸航路による物品運送"],a:2,e:"港湾運送事業法第2条により、沿岸荷役事業は上屋その他の荷さばき場における貨物の荷さばき等を行う事業である。船内荷役は別途「船内荷役事業」として区分されている。",d:2},
+
+// ===== 追加問題: 各科目の深掘り =====
+
+// 憲法 追加
+{id:128,s:"憲法",q:"憲法第98条第2項に規定されている内容として正しいものはどれか。",c:["条約の締結手続き","条約及び確立された国際法規の誠実な遵守","天皇の国事行為","内閣の責任"],a:1,e:"憲法第98条第2項「日本国が締結した条約及び確立された国際法規は、これを誠実に遵守することを必要とする」。国際協調主義の表れ。",d:2},
+
+// 民法 追加
+{id:129,s:"民法",q:"物権変動の対抗要件について、不動産の物権変動を第三者に対抗するために必要なものはどれか。",c:["引渡し","登記","公正証書","占有"],a:1,e:"民法第177条「不動産に関する物権の得喪及び変更は、不動産登記法その他の登記に関する法律の定めるところに従いその登記をしなければ、第三者に対抗することができない」。",d:1},
+{id:130,s:"民法",q:"動産の物権変動を第三者に対抗するために必要なものはどれか。",c:["登記","引渡し","公正証書","契約書"],a:1,e:"民法第178条「動産に関する物権の譲渡は、その動産の引渡しがなければ、第三者に対抗することができない」。",d:1},
+{id:131,s:"民法",q:"保証債務について、保証人が主たる債務者に生じた事由の効力を受けるか。",c:["一切受けない","主たる債務者に生じた事由は保証人にも効力が及ぶ","保証人の同意がある場合のみ及ぶ","裁判所の判断による"],a:1,e:"民法第457条第1項により、主たる債務者に対する履行の請求その他の事由は保証人に対してもその効力を生ずる（附従性）。",d:2},
+
+// 商法 追加
+{id:132,s:"商法",q:"船荷証券（B/L）の法的性質として正しいものはどれか。",c:["単なる受取証にすぎない","有価証券であり、物品の引渡請求権を表章する","保険証券である","契約書そのものである"],a:1,e:"商法第776条以下により、船荷証券は有価証券であり、運送品の引渡請求権を表章する。証券の所持人は運送品の引渡しを請求できる。",d:2},
+{id:133,s:"商法",q:"海上保険について正しいものはどれか。",c:["航海に関する事故による損害を填補する保険である","陸上の火災保険と同一の法律が適用される","商法には規定がない","船員の生命保険である"],a:0,e:"商法第815条以下により、海上保険は航海に関する事故によって生ずることのある損害を填補する損害保険契約である。",d:2},
+
+// 船員法 追加
+{id:134,s:"船員法",q:"船員法における補償休日について正しいものはどれか。",c:["祝日に勤務した場合にのみ付与される","作業に従事した日が1週間の基準労働日数を超えた場合等に付与される","年次有給休暇の代替である","退職時にのみ付与される"],a:1,e:"船員法第62条により、船員の基準労働期間において1週間に1日の休息日を下回る場合等に、その不足分について補償休日を付与しなければならない。",d:2},
+{id:135,s:"船員法",q:"船員手帳について正しいものはどれか。",c:["全ての日本国民に交付される","船員が所持すべきもので、国土交通大臣が交付する","船長のみに交付される","船舶所有者が作成する"],a:1,e:"船員法第51条により、船員手帳は国土交通大臣が船員に交付するものであり、船員はこれを所持しなければならない。乗下船の記録等が記載される。",d:1},
+
+// 船舶法 追加
+{id:136,s:"船舶法",q:"船籍港について正しいものはどれか。",c:["船舶の建造地をもって船籍港とする","船舶所有者の住所地を管轄する市町村をもって船籍港とする","国土交通大臣が指定する","船長の居住地を船籍港とする"],a:1,e:"船舶法第4条により、船籍港は船舶所有者の住所地（法人の場合は主たる事務所の所在地）を管轄する市町村とする。",d:1},
+
+// 船舶安全法 追加
+{id:137,s:"船舶安全法",q:"船舶安全法における臨時航行検査について正しいものはどれか。",c:["定期検査と同じ内容の検査である","船舶検査証書を受有しない船舶を臨時に航行させる場合に受ける検査","中間検査の一種である","船長の要請により随時行われる検査"],a:1,e:"船舶安全法第5条第1項第4号により、臨時航行検査は船舶検査証書を受有しない船舶を臨時に航行の用に供する場合に受けなければならない検査である。",d:2},
+
+// 海上交通安全法 追加
+{id:138,s:"海上交通安全法",q:"浦賀水道航路における航法として正しいものはどれか。",c:["全ての船舶が自由に航行できる","航路をこれに沿って航行する船舶は右側端に寄って航行する","航路の中央を航行しなければならない","航路を横断してはならない"],a:1,e:"海上交通安全法第3条により航路の右側航行が義務付けられており、特に浦賀水道航路ではこの原則が適用される。",d:2},
+{id:139,s:"海上交通安全法",q:"海上交通安全法上、航路を横断しようとする船舶の義務として正しいものはどれか。",c:["横断は全面禁止","航路をこれに沿って航行する船舶の進路を避けなければならない","優先して航行できる","徐行すれば横断できる"],a:1,e:"海上交通安全法第5条により、航路を横断しようとする船舶は、航路をこれに沿って航行する船舶の進路を避けなければならない。",d:1},
+
+// 港則法 追加
+{id:140,s:"港則法",q:"港則法上、港内において使用してはならないものはどれか。",c:["レーダー","汽笛","船舶自動識別装置（AIS）","みだりに発する光"],a:3,e:"港則法により、港内ではみだりにバラスト等を排出すること、及び何人もみだりに灯火等を使用して他の船舶の航行に妨げとなることをしてはならない。",d:2},
+
+// 海洋汚染防止法 追加
+{id:141,s:"海洋汚染等及び海上災害の防止に関する法律",q:"油記録簿について正しいものはどれか。",c:["全ての船舶に備え付け義務がある","一定のトン数以上の船舶に備え付けが義務付けられている","任意で備え付けるものである","陸上の事業所にのみ備え付ける"],a:1,e:"海防法第8条により、一定のトン数以上の油タンカー及びその他の船舶は油記録簿を船内に備え付け、油の排出等に関する事項を記載しなければならない。",d:2},
+
+// 内航海運業法 追加
+{id:142,s:"内航海運業法",q:"内航海運業法において、内航海運業者が事業を廃止した場合の手続きはどれか。",c:["何も不要","30日以内に国土交通大臣に届け出る","事前に許可を得る","廃止はできない"],a:1,e:"内航海運業法により、内航海運業者は事業を廃止した場合には遅滞なく（30日以内）国土交通大臣にその旨を届け出なければならない。",d:1},
+
+// 海上運送法 追加
+{id:143,s:"海上運送法",q:"特定旅客定期航路事業について正しいものはどれか。",c:["不特定多数の旅客を対象とする事業","特定の者の需要に応じて行う旅客定期航路事業","国際航路のみの事業","貨物専用の定期航路事業"],a:1,e:"海上運送法第2条第5項により、特定旅客定期航路事業は特定の者の需要に応じ、特定の範囲の人の運送を行う旅客定期航路事業をいう。例として離島のスクールボート等。",d:2},
+
+// 船舶職員法 追加
+{id:144,s:"船舶職員及び小型船舶操縦者法",q:"小型船舶の定義として正しいものはどれか。",c:["総トン数10トン未満の船舶","総トン数20トン未満の船舶","総トン数50トン未満の船舶","総トン数100トン未満の船舶"],a:1,e:"船舶職員及び小型船舶操縦者法第2条第4項により、小型船舶とは総トン数20トン未満の船舶をいう（一定の船舶を除く）。",d:1},
+
+// 港湾運送事業法 追加
+{id:145,s:"港湾運送事業法",q:"船内荷役事業について正しいものはどれか。",c:["陸上での荷さばきのみを行う事業","船舶の船内における貨物の積み込み又は取卸しを行う事業","船舶の修繕を行う事業","船員を派遣する事業"],a:1,e:"港湾運送事業法第2条第1項第2号により、船内荷役事業は船舶の船内における貨物の積み込み又は取り卸しを行う事業である。",d:1},
+
+// ===== さらに追加問題 =====
+
+// 正誤問題（True/False相当を4択化）
+
+{id:146,s:"憲法",q:"「法の下の平等」を規定している条文はどれか。",c:["第11条","第13条","第14条","第25条"],a:2,e:"憲法第14条「すべて国民は、法の下に平等であつて、人種、信条、性別、社会的身分又は門地により、政治的、経済的又は社会的関係において、差別されない」。",d:1},
+
+{id:147,s:"民法",q:"善意の第三者に対抗できない意思表示の瑕疵はどれか。",c:["心裡留保（相手方が善意の場合）","通謀虚偽表示","強迫","錯誤"],a:1,e:"民法第94条第2項「前項の規定による意思表示の無効は、善意の第三者に対抗することができない」。通謀虚偽表示の無効は善意の第三者に対抗不可。",d:2},
+
+{id:148,s:"商法",q:"海上運送における運送人の責任に関して、「堪航能力担保義務」とはどのような義務か。",c:["安全な速力で航行する義務","船舶を航海に堪え得る状態にする義務","適切な乗組員を配乗する義務のみ","積荷を適切に管理する義務"],a:1,e:"堪航能力担保義務（商法第739条）とは、船舶が安全に航海を遂行できる能力（船体・機関の状態、適切な乗組員の配乗、船倉の積荷に適する状態等）を確保する運送人の義務。",d:2},
+
+{id:149,s:"船員法",q:"船員法上、船長が死亡した場合の職務代行者について正しいものはどれか。",c:["機関長が代行する","甲板部の最上級の船舶職員が代行する","国土交通大臣が指名する","直ちに最寄りの港に入港しなければならない"],a:1,e:"船員法第11条により、船長が死亡等の場合は甲板部の職員のうち最上級の者がその職務を代行する。",d:2},
+
+{id:150,s:"船舶安全法",q:"危険物運送に関する規制を定めている船舶安全法上の規定は何か。",c:["危険物船舶運送及び貯蔵規則","船舶設備規程","船舶消防設備規則","船舶構造規則"],a:0,e:"船舶安全法に基づく「危険物船舶運送及び貯蔵規則」（危規則）により、危険物の海上運送に関する技術基準が定められている。IMDGコードに対応。",d:2},
+
+{id:151,s:"船員法",q:"船員法上の予備船員とはどのような者か。",c:["退職した元船員","雇入契約は成立しているが乗船していない船員","船舶所有者と雇用関係にない者","外国籍の船員"],a:1,e:"船員法第2条第2項により、予備船員とは船舶に乗り組むため雇用されている者で船内で使用されていない者をいう。",d:2},
+
+{id:152,s:"海上交通安全法",q:"海上交通安全法上、航路において他の船舶を追い越そうとする船舶の義務として正しいものはどれか。",c:["汽笛を鳴らせば追い越せる","できる限り航路の外側で追い越す","追い越しは全面禁止","追い越される船舶の同意が必要"],a:1,e:"海上交通安全法第8条により、航路において他の船舶を追い越そうとする船舶は、できる限り航路の外側において追い越さなければならない。",d:2},
+
+{id:153,s:"港則法",q:"港則法における修繕中の船舶について正しいものはどれか。",c:["修繕中は港則法が適用されない","港長の指定した場所で行わなければならない","任意の場所で修繕できる","修繕は港外で行わなければならない"],a:1,e:"港則法により、港内における船舶の修繕は港長の指定した場所で行わなければならない。港内秩序維持のための規定。",d:2},
+
+{id:154,s:"船舶法",q:"船舶の総トン数が変更になった場合の手続きとして正しいものはどれか。",c:["変更登記・変更登録が必要","手続き不要","新たに船舶国籍証書の交付を受ける必要がある","船舶を廃棄しなければならない"],a:0,e:"船舶法により、総トン数の変更等船舶の登記事項に変更が生じた場合は変更登記及び変更登録の手続きが必要。",d:2},
+
+{id:155,s:"海上運送法",q:"海上運送法における「航路」の定義として正しいものはどれか。",c:["海上交通安全法で定められた航路","船舶が定期に一定の港間を往来する経路","港湾区域内の水路","河川の航行路"],a:1,e:"海上運送法第2条第3項により、航路とは船舶が定期に一定の港間を往来するための経路をいう。海上交通安全法の航路とは別の概念。",d:2},
+
+{id:156,s:"国土交通省設置法",q:"運輸安全委員会の役割として正しいものはどれか。",c:["運輸事業の許認可","航空・鉄道・船舶事故の原因究明","船員の懲戒","運輸事業の料金設定"],a:1,e:"運輸安全委員会設置法により、運輸安全委員会は航空事故、鉄道事故及び船舶事故の原因究明のための調査を行い、事故の防止に寄与することを任務とする。",d:1},
+
+{id:157,s:"船員職業安定法",q:"船員労務官について正しいものはどれか。",c:["船員の採用面接を行う","船員法等の施行に関する事務を行う地方運輸局等の職員","船舶の検査を行う職員","海難審判を行う審判官"],a:1,e:"船員法第100条等により、船員労務官は地方運輸局等に配置され、船員の労働条件等に関する監督・指導等の事務を行う。",d:2},
+
+{id:158,s:"造船法",q:"造船法における「船舶」の範囲について正しいものはどれか。",c:["全ての船舶が対象","鋼製の一定のトン数以上の船舶が主な対象","木造船のみ対象","漁船は除外される"],a:1,e:"造船法は主に鋼製船舶の製造・改造に関する規制を定めており、一定のトン数以上の鋼製船舶が規制の主な対象となる。",d:2},
+
+{id:159,s:"国際船舶・港湾保安法",q:"国際港湾施設の保安計画について正しいものはどれか。",c:["港湾管理者が作成する必要はない","港湾施設保安計画を作成し、国土交通大臣の承認を受けなければならない","船舶保安計画と同一のものを使用する","任意で作成するものである"],a:1,e:"ISPS法により、国際港湾施設の管理者は港湾施設保安計画を作成し、国土交通大臣の承認を受けなければならない。",d:2},
+
+{id:160,s:"港湾法",q:"港湾計画について正しいものはどれか。",c:["国土交通大臣が策定する","港湾管理者が策定し、重要港湾等は国土交通大臣に提出する","民間企業が策定する","港湾計画の策定義務はない"],a:1,e:"港湾法第3条の3により、港湾管理者は港湾の開発、利用及び保全等に関する計画（港湾計画）を定めなければならない。重要港湾等では国土交通大臣に提出。",d:2},
+
+// さらに追加（目標200問以上）
+
+{id:161,s:"民法",q:"同時履行の抗弁権について正しいものはどれか。",c:["片務契約にも認められる","双務契約の当事者が相手方の履行提供があるまで自己の履行を拒絶できる権利である","裁判上のみ主張できる","時効により消滅する"],a:1,e:"民法第533条により、双務契約の当事者の一方は、相手方がその債務の履行を提供するまでは、自己の債務の履行を拒むことができる（同時履行の抗弁権）。",d:2},
+
+{id:162,s:"民法",q:"債権者代位権について正しいものはどれか。",c:["債権者が自己の債権を保全するため、債務者の権利を代位行使できる","債務者のみが行使できる","裁判所の許可が常に必要である","金銭債権に限り行使できる"],a:0,e:"民法第423条により、債権者は自己の債権を保全するため必要がある場合に、債務者に属する権利を行使することができる（債権者代位権）。",d:2},
+
+{id:163,s:"商法",q:"船舶の先取特権について正しいものはどれか。",c:["登記がなければ効力を生じない","法律の規定により当然に発生する担保物権である","船舶所有者の同意が必要","抵当権に常に劣後する"],a:1,e:"商法第842条以下により、船舶の先取特権は一定の債権について法律上当然に認められる法定担保物権であり、登記なくして効力を有する。",d:3},
+
+{id:164,s:"船員法",q:"船員労働委員会について正しいものはどれか。",c:["厚生労働省に設置されている","国土交通省に設置されている","各都道府県に設置されている","海上保安庁に設置されている"],a:1,e:"船員法第60条の2等により、船員中央労働委員会及び船員地方労働委員会は国土交通省に設置され、船員の労働条件等に関する紛争の調整等を行う。",d:2},
+
+{id:165,s:"船舶安全法",q:"船級協会による検査について正しいものはどれか。",c:["船級協会の検査は法定検査と無関係である","船級協会の検査をもって法定検査に代えることができる場合がある","船級協会は政府機関である","船級協会の検査は外国船にのみ適用される"],a:1,e:"船舶安全法第8条により、日本海事協会（ClassNK）等の船級協会による検査は、一定の条件の下で法定検査に代えることが認められている（代行検査制度）。",d:2},
+
+{id:166,s:"海上交通安全法",q:"海上交通安全法上、緊急用務を行う船舶に関する規定として正しいものはどれか。",c:["航路航行義務が免除される場合がある","緊急時でも全ての規制に従わなければならない","緊急用務船舶の規定はない","消防船のみに適用される"],a:0,e:"海上交通安全法第29条等により、海難の救助等緊急の用務を行う船舶については、一定の航法規定が適用除外となる場合がある。",d:2},
+
+{id:167,s:"港則法",q:"港則法における「雑種船」とはどのような船舶か。",c:["総トン数500トン以上の船舶","汽艇、はしけその他ろかい又は主としてろかいをもって運転する船舶","外国船舶のみ","危険物を運送する船舶"],a:1,e:"港則法第3条により、雑種船とは汽艇、はしけその他ろかい又は主としてろかいをもって運転する船舶その他の小型船舶をいう。",d:2},
+
+{id:168,s:"船舶のトン数の測度に関する法律",q:"船舶のトン数の測度に関する法律上、再測度が必要となる場合はどれか。",c:["毎年定期的に","船舶の改造により船舶の大きさ・容積に変更があった場合","船籍港を変更した場合","船長が変更になった場合"],a:1,e:"船舶のトン数の測度に関する法律により、船舶の改造等により閉囲場所の容積に変更を生じた場合は、再度トン数の測度を受けなければならない。",d:2},
+
+{id:169,s:"内航海運業法",q:"内航海運業法上の欠格事由に該当する者として正しいものはどれか。",c:["外国人","法人でない個人","登録を取り消され2年を経過しない者","60歳以上の者"],a:2,e:"内航海運業法第5条により、登録の取消しを受け、その取消しの日から2年を経過しない者等は内航海運業の登録を受けることができない（欠格事由）。",d:2},
+
+{id:170,s:"海上運送法",q:"海上運送法における輸送の安全に関する規定として正しいものはどれか。",c:["安全管理規程を定める義務はない","船舶運航事業者は安全管理規程を定め、国土交通大臣に届け出なければならない","安全管理は船長の裁量に任される","海上保安庁が安全管理を行う"],a:1,e:"海上運送法第10条の3等により、一般旅客定期航路事業者は安全管理規程を定め、国土交通大臣に届け出なければならない。運航管理者の選任も必要。",d:2},
+
+{id:171,s:"船舶職員及び小型船舶操縦者法",q:"海技免許の取消し又は業務停止の処分を行う機関はどれか。",c:["海上保安庁","国土交通大臣","海難審判所","地方裁判所"],a:1,e:"船舶職員及び小型船舶操縦者法により、海技免許の取消し又は業務停止の懲戒処分は国土交通大臣が行う。海難審判所は原因究明を行い、懲戒処分を行う。",d:2},
+
+{id:172,s:"港湾運送事業法",q:"一般港湾運送事業（元請事業）の内容として正しいものはどれか。",c:["船内荷役のみ行う事業","荷主から委託を受けて港湾運送全般を一貫して行う事業","はしけ運送のみ行う事業","倉庫業のみ行う事業"],a:1,e:"港湾運送事業法第2条第1項第1号により、一般港湾運送事業は荷主の委託を受けて船内荷役・はしけ運送・沿岸荷役等の港湾運送を一貫して行う事業（元請事業）。",d:2},
+
+{id:173,s:"領海等における外国船舶の航行に関する法律",q:"接続水域の範囲はどこまでか。",c:["基線から12海里","基線から24海里","基線から50海里","基線から200海里"],a:1,e:"領海及び接続水域に関する法律第4条により、接続水域は基線からその外側24海里の線までの海域（領海を除く）である。",d:1},
+
+{id:174,s:"造船法",q:"造船法上の許可なく船舶の製造を行った場合の罰則はあるか。",c:["罰則はない","懲役又は罰金の刑罰がある","行政指導のみ","営業停止のみ"],a:1,e:"造船法第12条により、許可を受けずに船舶の製造を行った者は罰金刑に処せられる。法律上の強制規定である。",d:2},
+
+{id:175,s:"港湾法",q:"港湾の分類として、港湾法上定められていないものはどれか。",c:["国際戦略港湾","国際拠点港湾","重要港湾","一等港湾"],a:3,e:"港湾法では港湾を国際戦略港湾、国際拠点港湾、重要港湾、地方港湾等に分類している。「一等港湾」という分類はない。",d:1},
+
+// さらに追加
+
+{id:176,s:"船員法",q:"船員法上の船内紀律に関する規定として正しいものはどれか。",c:["船長のみが紀律を維持する義務を負う","船員は船内の秩序を乱す行為をしてはならない","紀律に関する規定はない","海上保安官が船内紀律を維持する"],a:1,e:"船員法第21条により、船員は船長の指揮命令に従い、職務に精励し、船内の秩序を保持しなければならない。",d:1},
+
+{id:177,s:"船舶安全法",q:"船舶安全法上の検査対象となる事項として正しくないものはどれか。",c:["船体","機関","排水設備","船員の給与体系"],a:3,e:"船舶安全法第2条等により、検査対象は船体、機関、排水設備、操舵設備、係留設備、救命設備、消防設備等である。船員の給与体系は船員法の範疇。",d:1},
+
+{id:178,s:"海洋汚染等及び海上災害の防止に関する法律",q:"海洋汚染防止法上の「海洋施設」について正しいものはどれか。",c:["港湾施設のことである","海域に設けられた工作物で政令で定めるものをいう","全ての海上構造物","灯台のみを指す"],a:1,e:"海防法第3条第14号により、海洋施設とは海域に設けられる工作物（掘削等を行うプラットフォーム等）で政令で定めるものをいう。",d:2},
+
+{id:179,s:"民法",q:"法定利率（改正民法）について正しいものはどれか。",c:["年5%で固定","年3%を基準とし、3年ごとに変動する","年2%で固定","当事者の合意による"],a:1,e:"改正民法第404条により、法定利率は年3%とされ、3年を一期として変動する仕組み（変動制）が導入された。",d:2},
+
+{id:180,s:"商法",q:"海上物品運送契約について、運送人の責任の消滅時効期間はどれか。",c:["6か月","1年","2年","5年"],a:1,e:"商法第585条により、運送品の滅失等についての運送人の責任は、運送品の引渡しがされた日（引渡しがされるべき日）から1年以内に裁判上の請求がされないときは消滅する。",d:2},
+
+{id:181,s:"憲法",q:"憲法第96条に規定する憲法改正の手続きとして、国民投票における承認要件はどれか。",c:["投票総数の過半数","投票総数の3分の2以上","有権者の過半数","有権者の3分の2以上"],a:0,e:"憲法第96条第1項「この憲法の改正は、各議院の総議員の三分の二以上の賛成で、国会が、これを発議し、国民に提案してその承認を経なければならない。この承認には、特別の国民投票又は国会の定める選挙の際行はれる投票において、その過半数の賛成を必要とする」。",d:2},
+
+{id:182,s:"船員法",q:"船員法上、時間外労働について正しいものはどれか。",c:["時間外労働は一切禁止されている","船舶の安全確保のため必要な場合は時間外労働が認められる","時間外労働の割増賃金の規定はない","時間外労働は月100時間まで無制限に認められる"],a:1,e:"船員法第64条等により、航海当直等船舶の安全のために必要な場合や非常の場合は時間外労働が認められる。割増手当の支払い義務もある。",d:2},
+
+{id:183,s:"船舶法",q:"船舶の滅失・沈没の場合の手続きとして正しいものはどれか。",c:["船舶国籍証書を返還しなければならない","特に手続き不要","新たに登録し直す","保険会社に届け出るのみ"],a:0,e:"船舶法第15条により、船舶が滅失・沈没した場合は船舶国籍証書を管海官庁に返還し、抹消の手続きを行わなければならない。",d:1},
+
+{id:184,s:"国際船舶・港湾保安法",q:"ISPS法における船舶警報装置（Ship Security Alert System）について正しいものはどれか。",c:["全ての船舶に義務付けられている","国際航海船舶に設置が義務付けられている","任意設置である","旅客船のみに義務付けられている"],a:1,e:"ISPS法及びSOLAS条約により、国際航海船舶には船舶保安警報装置（SSAS）の設置が義務付けられている。テロ等の脅威に対する遠隔警報システム。",d:2},
+
+{id:185,s:"港湾運送事業法",q:"港湾運送事業の許可に付される条件として正しいものはどれか。",c:["条件は付されない","事業の適正な運営のため必要な条件を付すことができる","有効期間のみが条件として付される","資本金の制限のみ"],a:1,e:"港湾運送事業法第6条により、国土交通大臣は許可に際し、事業の適正な運営を確保するために必要な条件を付すことができる。",d:2},
+
+{id:186,s:"船舶職員及び小型船舶操縦者法",q:"船舶職員法上、承認を受けた外国の海技資格でも日本の船舶に乗り組むことができるか。",c:["できない","STCW条約に基づく承認を受けた場合にできる","常にできる","旅客船を除きできる"],a:1,e:"船舶職員及び小型船舶操縦者法第23条の2等により、STCW条約（船員の訓練及び資格証明並びに当直の基準に関する国際条約）に基づき承認された外国資格者は一定の条件で乗組むことができる。",d:3},
+
+{id:187,s:"海上交通安全法",q:"明石海峡航路について正しいものはどれか。",c:["航路の全長は約2kmである","航路幅は約1,500mである","一方通行である","長さ50m以上の船舶に航路航行義務がある"],a:3,e:"海上交通安全法第4条及び同法施行規則により、明石海峡航路では長さ50m以上の船舶に航路航行義務が課されている。",d:2},
+
+{id:188,s:"港則法",q:"港則法上、工事又は作業を港内で行う場合に必要な手続きはどれか。",c:["手続き不要","港長の許可","海上保安庁長官の許可","港湾管理者の許可のみ"],a:1,e:"港則法第31条により、港内又は港の境界附近において工事又は作業をしようとする者は港長の許可を受けなければならない。",d:1},
+
+{id:189,s:"民法",q:"即時取得（善意取得）の要件として正しくないものはどれか。",c:["取引行為により動産を取得すること","善意であること","無過失であること","登記をすること"],a:3,e:"民法第192条の即時取得の要件は、(1)取引行為による取得、(2)平穏・公然と動産の占有を始めたこと、(3)善意・無過失であること。登記は不動産の対抗要件であり動産の即時取得とは無関係。",d:2},
+
+{id:190,s:"船員法",q:"船員法における給料の支払いに関する原則として正しいものはどれか。",c:["年1回の一括払い","毎月1回以上の定期払い","船舶所有者の裁量による","航海終了時に支払う"],a:1,e:"船員法第53条により、給料その他の報酬は毎月1回以上の一定の期日を定めて支払わなければならない（定期払いの原則）。",d:1},
+
+{id:191,s:"海洋汚染等及び海上災害の防止に関する法律",q:"船舶からのバラスト水の排出について規制はあるか。",c:["規制はない","バラスト水管理条約に基づく規制がある","国内法上の規制のみ","港湾区域外では規制がない"],a:1,e:"海防法に基づき、バラスト水管理条約（BWM条約）の国内担保として、船舶のバラスト水の排出に関する規制が定められている。バラスト水処理装置の設置等が義務付けられている。",d:2},
+
+{id:192,s:"造船法",q:"造船法上、外国船舶の修繕について規制はあるか。",c:["外国船舶の修繕は禁止されている","規制はない","許可が必要","届出が必要"],a:1,e:"造船法は主に日本船舶の製造・改造を規制するものであり、外国船舶の通常の修繕については特段の規制は設けていない。",d:2},
+
+{id:193,s:"憲法",q:"憲法第73条に規定する内閣の事務として正しいものはどれか。",c:["法律を制定すること","条約を締結すること","国民投票を実施すること","国会を召集すること"],a:1,e:"憲法第73条第3号により、内閣の事務には条約を締結することが含まれる。ただし事前又は事後に国会の承認を経ることを必要とする。法律の制定は国会の権能、国会の召集は天皇の国事行為。",d:2},
+
+{id:194,s:"船員法",q:"船長は航海中に船内で犯罪が行われた場合、どのような権限を有するか。",c:["犯人を処罰する権限","犯罪の事実を調査し、証拠を保全する権限","裁判を行う権限","犯人を釈放する権限"],a:1,e:"船員法第19条により、船長は船内において犯罪があると認めるときは犯罪の事実を調査し、証拠を保全しなければならない。処罰や裁判の権限はない。",d:2},
+
+{id:195,s:"船舶安全法",q:"船舶安全法に基づく「特別規則」の例として正しいものはどれか。",c:["船舶設備規程","刑事訴訟法","労働基準法","商法"],a:0,e:"船舶安全法に基づき、船舶設備規程、船舶構造規程、船舶消防設備規則、船舶救命設備規則等の特別規則（省令）が制定されている。",d:1},
+
+{id:196,s:"内航海運業法",q:"内航海運業法における暴力団排除条項について正しいものはどれか。",c:["暴力団排除条項はない","暴力団員等は登録を受けることができない","暴力団員でも登録できる","法人の場合のみ適用される"],a:1,e:"内航海運業法第5条の欠格事由として、暴力団員等による不当な行為の防止等に関する法律に規定する暴力団員等は登録を受けることができない。",d:1},
+
+{id:197,s:"海上運送法",q:"人の運送をする船舶運航事業者の旅客に対する責任について正しいものはどれか。",c:["一切責任を負わない","旅客の生命・身体の損害について無過失責任を負う","過失がある場合にのみ責任を負う","保険でのみカバーされる"],a:2,e:"海上運送法及び商法により、船舶運航事業者は旅客の生命・身体の損害について、運送人又はその使用人に過失があった場合に責任を負う（過失責任）。",d:2},
+
+{id:198,s:"船舶職員及び小型船舶操縦者法",q:"小型船舶操縦士の免許を受けることができる年齢として正しいものはどれか。",c:["14歳以上","16歳以上（2級・特殊）","18歳以上のみ","20歳以上のみ"],a:1,e:"船舶職員及び小型船舶操縦者法により、2級小型船舶操縦士及び特殊小型船舶操縦士の免許は16歳以上で取得可能。1級は18歳以上。",d:1},
+
+{id:199,s:"港湾運送事業法",q:"港湾運送事業法上のいかだ運送事業とはどのような事業か。",c:["旅客をいかだで運送する事業","港湾において木材をいかだに組み、又はいかだによって運送する事業","いかだの製造・販売事業","河川でのいかだ下り事業"],a:1,e:"港湾運送事業法第2条第1項第5号により、いかだ運送事業は港湾において木材をいかだに組み、又はいかだにより運送する事業をいう。",d:1},
+
+{id:200,s:"領海等における外国船舶の航行に関する法律",q:"排他的経済水域（EEZ）の範囲はどこまでか。",c:["基線から12海里","基線から24海里","基線から100海里","基線から200海里"],a:3,e:"排他的経済水域及び大陸棚に関する法律第1条により、排他的経済水域は基線からその外側200海里の線までの海域（領海を除く）である。",d:1},
+
+{id:201,s:"民法",q:"相殺の要件として正しくないものはどれか。",c:["双方の債務が弁済期にあること","双方が同種の目的を有する債務を負担すること","一方が不法行為による損害賠償債務を負担すること（被害者側からの相殺は可）","債務の性質が相殺を許さないものでないこと"],a:2,e:"改正民法第509条により、悪意による不法行為に基づく損害賠償の債務を負担する者は、相殺をもって債権者に対抗することができない。ただし被害者側からの相殺は可能。",d:3},
+
+{id:202,s:"船員法",q:"船員法上、船員保険について正しいものはどれか。",c:["陸上の健康保険と同一の制度が適用される","船員保険法による独自の制度がある","船員には保険制度が適用されない","労災保険のみが適用される"],a:1,e:"船員保険法により、船員には船員保険という独自の社会保険制度が適用される。疾病・負傷、失業、年金等をカバーする。",d:1},
+
+{id:203,s:"海上交通安全法",q:"備讃瀬戸東航路の特徴として正しいものはどれか。",c:["一方通行である","瀬戸大橋の下を通過する航路である","夜間航行が禁止されている","漁船専用航路である"],a:1,e:"備讃瀬戸東航路は瀬戸大橋の下を通過する航路であり、大型船舶が瀬戸内海を東西に航行する主要航路の一つである。",d:2},
+
+{id:204,s:"船舶法",q:"船舶法上の不開港場について正しいものはどれか。",c:["外国船舶は一切入港できない","特別の許可なく外国船舶が入港することはできない","日本船舶も入港できない","不開港場の規定はない"],a:1,e:"船舶法第3条等により、不開港場への外国船舶の入港は原則として制限されており、特別の許可（寄港地の指定等）が必要。",d:2},
+
+{id:205,s:"国土交通省設置法",q:"海上保安庁長官は誰が任命するか。",c:["内閣総理大臣","国土交通大臣","天皇","国会"],a:1,e:"海上保安庁法第9条により、海上保安庁長官は国土交通大臣が任命する。海上保安庁は国土交通省の外局である。",d:1},
+
+{id:206,s:"船員職業安定法",q:"船員の直接募集について正しいものはどれか。",c:["直接募集は禁止されている","届出が必要な場合がある","何の手続きもなく自由に行える","許可が常に必要"],a:1,e:"船員職業安定法第27条以下により、船員の募集には直接募集と委託募集があり、それぞれ届出等の手続きが必要な場合がある。",d:2},
+
+{id:207,s:"商法",q:"傭船契約について正しいものはどれか。",c:["傭船契約は必ず書面でなければならない","定期傭船契約と裸傭船契約がある","傭船契約は商法に規定がない","傭船契約は個品運送契約と同一である"],a:1,e:"商法には定期傭船契約（第704条以下）及び船舶賃貸借（裸傭船に相当）の規定がある。航海傭船も実務上存在する。個品運送契約とは別の契約類型。",d:2},
+
+{id:208,s:"海洋汚染等及び海上災害の防止に関する法律",q:"海防法上の廃棄物海洋投入処分の許可権者は誰か。",c:["環境大臣","国土交通大臣（海上保安庁長官）","都道府県知事","港湾管理者"],a:0,e:"海防法第18条の8等により、廃棄物の海洋投入処分については環境大臣の許可が必要。ロンドン条約（海洋投棄規制条約）に対応した規制。",d:3},
+
+{id:209,s:"港湾法",q:"港湾法上の開発保全航路について正しいものはどれか。",c:["港湾管理者が管理する","国土交通大臣が開発・保全・管理する","海上保安庁が管理する","民間企業が管理する"],a:1,e:"港湾法第55条の6以下により、開発保全航路は国土交通大臣が指定・開発・保全・管理を行う。港湾管理者の管理区域外の航路について国が管理する仕組み。",d:2},
+
+{id:210,s:"国際船舶・港湾保安法",q:"船舶保安証書について正しいものはどれか。",c:["船級協会のみが発行する","国土交通大臣が交付する","IMO（国際海事機関）が直接交付する","船舶保安証書という制度はない"],a:1,e:"ISPS法により、国際船舶保安証書は船舶保安計画の承認後、保安検査に合格した国際航海船舶に対して国土交通大臣が交付する。",d:2},
+
+// ===== 伊藤塾レジュメベース 追加問題 (id:211〜) =====
+
+// ── 船舶法：登記・登録の手続き順序 ──
+{id:211,s:"船舶法",q:"船舶法上、新規建造による船舶の取得における手続きの正しい順序はどれか。",c:["登録→登記→船舶国籍証書の交付","登記→登録→船舶国籍証書の交付","船舶国籍証書の交付→登記→登録","測度→登録→登記"],a:1,e:"船舶法の原則的な流れは、①登記→②登録→③船舶国籍証書の交付である。登記は登記所、登録・証書交付は管海官庁の管轄。",d:1},
+{id:212,s:"船舶法",q:"新規建造船の取得手続きにおいて、船籍港を定めた後、最初に行うべき手続きはどれか。",c:["登記所に所有権の保存登記を申請する","管海官庁に総トン数の測度を申請する","管海官庁に船舶国籍証書の交付を申請する","船舶国籍証書の謄本を備える"],a:1,e:"新規建造の場合、①船籍港を定める→②管海官庁に総トン数の測度を申請→③登記所に所有権の保存登記→④管海官庁に船舶国籍証書の交付申請→⑤証書の謄本を備える、の順で進む。",d:2},
+{id:213,s:"船舶法",q:"新規建造船の取得手続きにおいて、所有権の保存登記を申請する先はどこか。",c:["管海官庁","船籍港を管轄する登記所","海上保安庁","地方運輸局長"],a:1,e:"新規建造の場合、所有権の保存登記は船籍港を管轄する登記所に申請する。登記は登記所、登録は管海官庁という区分が重要。",d:1},
+{id:214,s:"船舶法",q:"譲渡による船舶の取得の場合、譲受人がまず行うべき手続きはどれか。",c:["管海官庁に変更登録を申請する","船籍港を管轄する登記所に所有権移転登記を申請する","船舶国籍証書の書換えを申請する","旧所有者の船舶国籍証書を返還する"],a:1,e:"譲渡による取得では、①登記所に所有権移転（船籍港変更）登記→②管海官庁に変更登録→③船舶国籍証書の書換え→④旧証書の返還、の順で行う。",d:2},
+{id:215,s:"船舶法",q:"船舶の譲渡による取得において、変更登録の申請と同時に行うべき手続きはどれか。",c:["所有権移転登記","総トン数の測度","船舶国籍証書の書換え","船舶の検査"],a:2,e:"譲渡による取得の場合、管海官庁への変更登録の申請と同時に船舶国籍証書の書換えを申請する。書換え後、遅滞なく旧証書を返還する。",d:2},
+{id:216,s:"船舶法",q:"所有者の氏名・名称・住所に変更があった場合、最初に行う手続きはどれか。",c:["管海官庁に変更登録を申請する","船籍港を管轄する登記所に変更登記を申請する","船舶国籍証書の書換えを申請する","旧証書を返還する"],a:1,e:"所有者の氏名等に変更があった場合は、①登記所に変更登記→登記済証の交付後→②管海官庁に変更登録→③証書の書換え→④旧証書の返還の順で行う。",d:2},
+{id:217,s:"船舶法",q:"総トン数に変更があった場合の手続きにおいて、最初に行うべきことはどれか。",c:["登記所に変更登記を申請する","管海官庁に総トン数の改測を申請する","船舶国籍証書の書換えを申請する","変更登録を申請する"],a:1,e:"総トン数の変更の場合は登記所ではなく、まず管海官庁に総トン数の改測を申請する。改測後→②変更登録→③証書の書換え→④旧証書の返還の順。登記は不要（トン数は登記事項でないため）。",d:2},
+{id:218,s:"船舶法",q:"船舶法上、総トン数の測度の手数料はどのように納付するか。",c:["収入印紙を申請書に貼付","手数料納付書に収入印紙を貼付","現金で納付","振込で納付"],a:1,e:"総トン数の測度の手数料は「手数料納付書」に収入印紙を貼付して納付する。過去にR5・R3で出題されている。",d:3},
+{id:219,s:"船舶法",q:"船舶法上、総トン数の改測の手数料はどのように納付するか。",c:["手数料納付書に収入印紙を貼付","収入印紙を申請書に貼付","収入印紙（納付方法の指定あり）","現金で納付"],a:2,e:"総トン数の改測の手数料は収入印紙で納付する。R5・R3で出題実績がある。測度は「手数料納付書」に貼付、改測は「収入印紙」と区別が重要。",d:3},
+{id:220,s:"船舶法",q:"船舶国籍証書の交付の手数料はどのように納付するか。",c:["収入印紙を申請書に貼付","手数料納付書に収入印紙を貼付","現金で納付","口座振替"],a:1,e:"船舶国籍証書の交付の手数料は「手数料納付書」に収入印紙を貼付して納付する。R4・R2で出題実績あり。",d:3},
+{id:221,s:"船舶法",q:"総トン数計算書の謄本の交付の手数料はどのように納付するか。",c:["手数料納付書に貼付","収入印紙を申請書に貼付","現金で納付","郵便為替"],a:1,e:"総トン数計算書の謄本の交付の手数料は収入印紙を「申請書」に貼付して納付する。R5・R3・R2で出題実績がある。",d:3},
+{id:222,s:"船舶法",q:"船体に標示すべき事項のうち、船首側に表示するものはどれか。",c:["船名・船籍港","船名・喫水尺度・満載喫水線","船名のみ","船籍港のみ"],a:1,e:"船首側には船名、喫水尺度、満載喫水線を標示する。船尾側には船名と船籍港を標示する。",d:2},
+{id:223,s:"船舶法",q:"船体の船尾側に標示すべき事項として正しいものはどれか。",c:["船名・喫水尺度","船名・船籍港","船名・満載喫水線","船籍港・喫水尺度"],a:1,e:"船尾側には船名と船籍港を標示する。船首側の標示事項（船名・喫水尺度・満載喫水線）との違いに注意。",d:2},
+{id:224,s:"船舶法",q:"船舶法上、「登記所」が関わる手続きはどれか。",c:["総トン数の測度","所有権の保存登記","船舶国籍証書の交付","変更登録"],a:1,e:"登記所が関わるのは所有権の保存登記・移転登記・変更登記などの「登記」手続き。測度・登録・証書交付は管海官庁の管轄。",d:1},
+
+// ── 海上交通安全法：各航路の特徴 ──
+{id:225,s:"海上交通安全法",q:"浦賀水道航路と中ノ瀬航路について、正しいものはどれか。",c:["いずれも東京湾の入り口にある航路である","浦賀水道航路は一方通行である","中ノ瀬航路は南航船のみ通航可能である","いずれも伊勢湾にある航路である"],a:0,e:"浦賀水道航路と中ノ瀬航路はいずれも東京湾の入り口に位置する航路。浦賀水道航路は北航船・南航船いずれも通航可（右側通航）、中ノ瀬航路は北航船のみ通航可。",d:2},
+{id:226,s:"海上交通安全法",q:"中ノ瀬航路（法11条）について、正しいものはどれか。",c:["北航船・南航船いずれも通航できる","北航船のみ通航できる","南航船のみ通航できる","巨大船のみ通航できる"],a:1,e:"海上交通安全法第11条により、中ノ瀬航路は北航船（東京湾に入っていく船）のみが通航できる。南航船は浦賀水道航路を使用する。",d:2},
+{id:227,s:"海上交通安全法",q:"伊良湖水道航路（法13条・14条）の特徴として正しいものはどれか。",c:["一方通行の航路である","右側通航で巨大船に優先権がある","左側通航の航路である","潮流に従って通航方向が変わる"],a:1,e:"伊良湖水道航路は伊勢湾の入り口にある航路で、右側通航。航路に沿って航行中の巨大船に対し、航路に入り又は横断しようとする船舶は進路を避けなければならない（巨大船優先）。",d:2},
+{id:228,s:"海上交通安全法",q:"明石海峡航路（法15条）について、正しいものはどれか。",c:["一方通行である","右側通航の航路である","瀬戸内海と太平洋の間にある","左側通航の航路である"],a:1,e:"明石海峡航路は大阪湾と瀬戸内海の間の淡路島北側にある航路で、右側通航が定められている。",d:1},
+{id:229,s:"海上交通安全法",q:"備讃瀬戸東航路（法16条）の特徴として正しいものはどれか。",c:["双方向通航である","北東方向に航行する船舶のみ通航できる","南西方向に航行する船舶のみ通航できる","巨大船は通航禁止である"],a:1,e:"備讃瀬戸東航路は千鳥から本州方向（北東方向）に航行する船舶のみが通航できる航路。右側通航で備讃瀬戸北航路に続いている。",d:2},
+{id:230,s:"海上交通安全法",q:"宇高東航路・宇高西航路と備讃瀬戸東航路の関係について、正しいものはどれか。",c:["宇高東航路・宇高西航路の船舶が常に優先される","備讃瀬戸東航路を航行する巨大船が優先される","いずれの航路の船舶も同等である","巨大船以外の船舶が優先される"],a:1,e:"法16条・17条により、宇高東航路又は宇高西航路に沿って航行している船舶（巨大船除く）は、備讃瀬戸東航路を航行する巨大船の進路を避けなければならない。",d:2},
+{id:231,s:"海上交通安全法",q:"水島航路（法19条）と備讃瀬戸北航路の関係について、正しいものはどれか。",c:["水島航路の船舶が常に優先される","水島航路に沿って航行する船舶は備讃瀬戸北航路の巨大船の進路を避ける","両航路の船舶は同等である","巨大船が水島航路の船舶に避ける"],a:1,e:"法19条により、水島航路をこれに沿って航行している船舶は、備讃瀬戸北航路を航行する巨大船の進路を避けなければならない。",d:2},
+{id:232,s:"海上交通安全法",q:"来島海峡航路（法20条）における順潮時の通航水道はどれか。",c:["中水道","東水道","西水道","北水道"],a:2,e:"来島海峡航路では、順潮時は西水道を、逆潮時は中水道を航行する。「順西逆中」と覚える。転流があった場合は航行中の水道をそのまま航行できる。",d:2},
+{id:233,s:"海上交通安全法",q:"来島海峡航路（法20条）における逆潮時の通航水道はどれか。",c:["西水道","東水道","中水道","南水道"],a:2,e:"逆潮時は中水道を航行する。順潮時は西水道。水道航行中に転流があった場合は、航行中の水道をそのまま続けて航行できる。",d:2},
+{id:234,s:"海上交通安全法",q:"来島海峡航路の航行中に転流があった場合、船舶はどうすべきか。",c:["直ちに反対の水道に移動する","航行中の水道をそのまま続けて航行できる","最寄りの港に入港する","停泊して潮流の変化を待つ"],a:1,e:"法20条により、水道航行中に転流があった場合は、航行中の水道をそのまま続けて航行できる。無理に水道を変更する必要はない。",d:2},
+{id:235,s:"海上交通安全法",q:"巨大船が表示する灯火として正しいものはどれか。",c:["1個の紅色全周灯火","船の前部及び後部に3m以上の間隔を有する2個の緑色全周灯火","2個の白色全周灯火","1個の緑色全周灯火"],a:1,e:"巨大船は船の前部及び後部に3メートル以上の間隔を有する2個の緑色の全周灯火を表示しなければならない。",d:2},
+{id:236,s:"海上交通安全法",q:"危険物積載船が表示する灯火として正しいものはどれか。",c:["2個の緑色全周灯火","船の最も見えやすい場所に1.5m以上の間隔を有する2個の紅色全周灯火","1個の紅色全周灯火","3個の白色全周灯火"],a:1,e:"危険物積載船は船の最も見えやすい場所に1メートル50センチ以上の間隔を有する2個の紅色の全周灯火を表示する。巨大船の緑色灯火との区別が重要。",d:2},
+{id:237,s:"海上交通安全法",q:"巨大船と危険物積載船の灯火の違いについて、正しいものはどれか。",c:["いずれも緑色灯火を表示する","巨大船は緑色、危険物積載船は紅色の灯火を表示する","いずれも紅色灯火を表示する","巨大船は白色、危険物積載船は紅色"],a:1,e:"巨大船は2個の緑色全周灯火（間隔3m以上）、危険物積載船は2個の紅色全周灯火（間隔1.5m以上）。色と間隔の違いが試験頻出。",d:2},
+{id:238,s:"海上交通安全法",q:"海上交通安全法上、「北航船」とはどのような船舶か。",c:["北に向かって航行するすべての船舶","東京湾に入っていく船舶","東京湾から出ていく船舶","北海道に向かう船舶"],a:1,e:"浦賀水道航路・中ノ瀬航路における「北航船」とは東京湾に入っていく船舶を指す。反対に「南航船」は東京湾から出ていく船舶。",d:1},
+{id:239,s:"海上交通安全法",q:"備讃瀬戸北航路において、青色で示される区域の意味はどれか。",c:["優先航行区域","航行不可（島の反対側を通航すること）","錨泊区域","漁船専用区域"],a:1,e:"備讃瀬戸北航路では青色で示す区域は航行不可であり、島の反対側を通航しなければならない。",d:2},
+{id:240,s:"海上交通安全法",q:"備讃瀬戸北航路で錨泊又は停留している船舶（巨大船を除く）に対する規定として正しいものはどれか。",c:["航路を航行する全ての船舶に避ける義務がある","備讃瀬戸北航路を航行する巨大船の進路を避けなければならない","錨泊は常に優先される","特に規定はない"],a:1,e:"法18条・19条により、錨泊又は停留している船舶（巨大船を除く）は、備讃瀬戸北航路を航行する巨大船の進路を避けなければならない。",d:2},
+
+// ── 港則法：特定港以外に準用される規定（45条） ──
+{id:241,s:"港則法",q:"港則法第45条により、特定港以外の港にも準用される規定として正しいものはどれか。",c:["危険物の荷役に関する規定（37条1項）","船舶に対する移動命令（9条）","入港届出に関する規定","錨地の指定に関する規定"],a:1,e:"港則法第45条により、特定港以外の港にも準用される規定には第9条（船舶に対する移動命令）が含まれる。",d:2},
+{id:242,s:"港則法",q:"港則法第45条で特定港以外にも準用される第21条の内容はどれか。",c:["入港届出","漂流物等の除却命令","危険物の荷役許可","船舶の修繕届出"],a:1,e:"第21条は漂流物等の除却命令に関する規定であり、特定港以外の港にも準用される（第45条）。",d:2},
+{id:243,s:"港則法",q:"港則法第45条で特定港以外にも準用される第28条の内容はどれか。",c:["危険物の荷役","私設信号の設置許可","入港届出","錨地の指定"],a:1,e:"第28条は私設信号を設置しようとする者に対する許可の規定であり、特定港以外の港にも準用される。",d:3},
+{id:244,s:"港則法",q:"港則法第45条で特定港以外にも準用される第31条の内容はどれか。",c:["船舶の修繕届出","港内又は港の境界附近における工事・作業の許可","危険物の荷役","いかだの運行許可"],a:1,e:"第31条は港内又は港の境界附近における工事・作業をしようとする者に対する許可の規定。特定港以外にも準用（第45条）。",d:2},
+{id:245,s:"港則法",q:"港則法第45条で特定港以外にも準用される第37条第2項の内容はどれか。",c:["危険物の荷役許可","火災発生のおそれがある場合における喫煙・火気取扱いの禁止","入港届出","船舶の修繕届出"],a:1,e:"第37条第2項は火災発生のおそれがある場合における喫煙・火気取扱いの禁止の規定。特定港以外にも準用（第45条）。",d:3},
+{id:246,s:"港則法",q:"港則法第45条で特定港以外にも準用される規定に含まれないものはどれか。",c:["第9条（移動命令）","第28条（私設信号の設置許可）","第23条（危険物の荷役許可）","第31条（工事・作業の許可）"],a:2,e:"第23条（危険物の荷役許可）は特定港のみに適用される規定であり、第45条による準用の対象に含まれていない。",d:3},
+{id:247,s:"港則法",q:"港則法上、特定港内で危険物の荷役・運搬・貯蔵を行う場合に必要な手続きはどれか。",c:["届出","許可","報告","通報"],a:1,e:"特定港内で危険物の荷役、運搬、貯蔵を行う場合は港長の許可が必要（第37条の規定による許可）。",d:1},
+{id:248,s:"港則法",q:"港則法上、特定港内でいかだの運行を行う場合に必要な手続きはどれか。",c:["届出","許可","報告","手続き不要"],a:1,e:"特定港内でのいかだの運行は港長の許可が必要。",d:2},
+{id:249,s:"港則法",q:"港則法上、特定港内で船舶の修繕及び係船を行う場合に必要な手続きはどれか。",c:["許可","届出","報告","認可"],a:1,e:"特定港内での船舶の修繕及び係船は届出が必要。危険物の荷役や工事・作業が「許可」であるのに対し、修繕・係船は「届出」である点に注意。",d:2},
+{id:250,s:"港則法",q:"港則法上、特定港への入港・出港・びょう泊（錨泊）に必要な手続きはどれか。",c:["許可","届出","認可","報告"],a:1,e:"特定港への入港、出港、びょう泊（錨泊）はいずれも届出が必要。許可ではなく届出である点に注意。",d:2},
+
+// ── 海上運送法・内航海運業法：許可/登録/届出の区別 ──
+{id:251,s:"海上運送法",q:"一般旅客定期航路事業の開始に必要な手続きはどれか。",c:["届出","登録","許可","認可"],a:2,e:"海上運送法により、一般旅客定期航路事業の開始には国土交通大臣の許可が必要。旅客の安全確保の観点から最も厳しい規制。",d:1},
+{id:252,s:"海上運送法",q:"旅客不定期航路事業の開始に必要な手続きはどれか。",c:["届出","登録","許可","認可"],a:2,e:"旅客不定期航路事業の開始にも国土交通大臣の許可が必要。旅客を運送する事業は定期・不定期を問わず許可制。",d:2},
+{id:253,s:"海上運送法",q:"貨物定期航路事業の開始に必要な手続きはどれか。",c:["許可","登録","届出","認可"],a:2,e:"貨物定期航路事業の開始は届出で足りる。旅客運送と異なり、貨物のみの定期航路は届出制。",d:2},
+{id:254,s:"海上運送法",q:"自動車航送貨物定期航路事業の開始に必要な手続きはどれか。",c:["許可","登録","届出","認可"],a:1,e:"自動車航送貨物定期航路事業の開始は登録が必要。貨物定期航路事業（届出）よりも厳しく、旅客事業（許可）よりは緩やかな規制。",d:2},
+{id:255,s:"海上運送法",q:"一般旅客定期航路事業における運賃の上限の設定・変更に必要な手続きはどれか。",c:["届出","認可","許可","報告"],a:1,e:"一般旅客定期航路事業における運賃の上限の設定・変更は国土交通大臣の認可が必要。",d:2},
+{id:256,s:"海上運送法",q:"一般旅客定期航路事業における運送約款の制定・変更に必要な手続きはどれか。",c:["届出","認可","許可","報告"],a:1,e:"一般旅客定期航路事業の運送約款の制定・変更は国土交通大臣の認可が必要。",d:2},
+{id:257,s:"海上運送法",q:"一般旅客定期航路事業の事業計画の変更に必要な手続きはどれか。",c:["届出","許可","認可","報告"],a:2,e:"一般旅客定期航路事業の事業計画の変更は国土交通大臣の認可が必要。",d:2},
+{id:258,s:"海上運送法",q:"一般旅客定期航路事業の譲渡・譲受に必要な手続きはどれか。",c:["届出","認可","許可","報告"],a:1,e:"一般旅客定期航路事業の譲渡・譲受・承継・相続には国土交通大臣の認可が必要。",d:2},
+{id:259,s:"海上運送法",q:"対外旅客定期航路事業の休止・廃止に必要な手続きはどれか。",c:["許可","認可","届出","報告"],a:2,e:"対外旅客定期航路事業の休止・廃止は届出で足りる。",d:2},
+{id:260,s:"海上運送法",q:"旅客運送事業者の安全管理規程に必要な手続きはどれか。",c:["許可","認可","届出","報告"],a:2,e:"旅客運送事業者の安全管理規程は届出が必要。",d:2},
+{id:261,s:"海上運送法",q:"海上運送法上、料金の制定・変更に必要な手続きはどれか。",c:["認可","許可","届出","報告"],a:2,e:"料金の制定・変更は届出で足りる。運賃の上限（認可）と料金（届出）の区別に注意。",d:2},
+{id:262,s:"海上運送法",q:"遊覧旅客不定期航路事業の開始に必要な手続きはどれか。",c:["許可","登録","届出","認可"],a:2,e:"遊覧旅客不定期航路事業の開始は届出で足りる。一般の旅客不定期航路事業（許可）とは異なる。",d:2},
+{id:263,s:"内航海運業法",q:"総トン数100トン以上又は長さ30m以上の船舶を使用する内航海運業の開始に必要な手続きはどれか。",c:["届出","許可","登録","認可"],a:2,e:"総トン数100トン以上又は長さ30m以上の船舶を使用する内航海運業の開始は国土交通大臣への登録が必要。",d:1},
+{id:264,s:"内航海運業法",q:"総トン数100トン未満かつ長さ30m未満の船舶を使用する内航海運業の開始に必要な手続きはどれか。",c:["登録","許可","届出（30日以内）","認可"],a:2,e:"総トン数100トン未満かつ長さ30m未満の船舶の場合は届出のみ（30日以内）で足りる。登録が必要な船舶との規模の境界に注意。",d:2},
+{id:265,s:"内航海運業法",q:"内航運送取扱業の開始に必要な手続きはどれか。",c:["登録","許可","届出（30日以内）","認可"],a:2,e:"内航運送取扱業の開始は届出（30日以内）で足りる。内航海運業（登録）とは規制の程度が異なる。",d:2},
+{id:266,s:"内航海運業法",q:"内航海運業法上、事業用船舶の新設・使用船の変更の届出期限はどれか。",c:["遅滞なく","15日以内","30日以内","60日以内"],a:1,e:"船舶の内航運送への新船・使用船の変更は15日以内に届出が必要。30日以内（事業開始等）との区別に注意。",d:3},
+
+// ── 海洋汚染防止法：許可/承認/登録/確認/届出/通報の区別 ──
+{id:267,s:"海洋汚染等及び海上災害の防止に関する法律",q:"海洋施設からの廃棄物の海洋投入処分に必要な手続きはどれか。",c:["届出","環境大臣の許可","国土交通大臣の許可","海上保安庁長官の承認"],a:1,e:"海洋施設からの廃棄物の海洋投入処分には環境大臣の許可が必要。許可権者が環境大臣である点に注意。",d:2},
+{id:268,s:"海洋汚染等及び海上災害の防止に関する法律",q:"廃油処理事業の開始（港湾管理者・漁港管理者以外の者）に必要な手続きはどれか。",c:["届出","環境大臣の許可","国土交通大臣の許可","海上保安庁長官の承認"],a:2,e:"廃油処理事業の開始は、港湾管理者・漁港管理者以外の者の場合は国土交通大臣の許可が必要。港湾管理者・漁港管理者の場合は届出で足りる。",d:2},
+{id:269,s:"海洋汚染等及び海上災害の防止に関する法律",q:"廃油処理事業の開始について、港湾管理者又は漁港管理者が行う場合に必要な手続きはどれか。",c:["許可","あらかじめ国土交通大臣に届出","事後の届出","承認"],a:1,e:"港湾管理者又は漁港管理者が廃油処理事業を開始する場合は、あらかじめ国土交通大臣に届出が必要。一般の事業者（許可）との違いに注意。",d:2},
+{id:270,s:"海洋汚染等及び海上災害の防止に関する法律",q:"海洋汚染防止に関する試験・研究・調査のために必要な手続きはどれか。",c:["環境大臣の許可","国土交通大臣の許可","海上保安庁長官の承認","届出"],a:2,e:"海洋汚染防止に関する試験・研究・調査のためには海上保安庁長官の承認が必要。",d:3},
+{id:271,s:"海洋汚染等及び海上災害の防止に関する法律",q:"原動機からの窒素酸化物の放出量確認に必要な手続きはどれか。",c:["届出","許可","承認","国土交通大臣の確認"],a:3,e:"原動機からの窒素酸化物の放出量は、原動機が船舶に設置された後に国土交通大臣の確認を受ける必要がある。",d:3},
+{id:272,s:"海洋汚染等及び海上災害の防止に関する法律",q:"原動機取扱手引書の作成に必要な手続きはどれか。",c:["届出","許可","国土交通大臣の登録","承認"],a:2,e:"原動機取扱手引書の作成は国土交通大臣の登録を受ける必要がある。",d:3},
+{id:273,s:"海洋汚染等及び海上災害の防止に関する法律",q:"未査定液体物質の輸送に必要な手続きはどれか。",c:["あらかじめ届出","許可","承認","報告"],a:0,e:"未査定液体物質の輸送はあらかじめ届出が必要。",d:2},
+{id:274,s:"海洋汚染等及び海上災害の防止に関する法律",q:"油濁処理規定の作成・変更に必要な手続きはどれか。",c:["あらかじめ届出","遅滞なく届出","許可","承認"],a:1,e:"油濁処理規定の作成・変更は遅滞なく届出が必要。「あらかじめ」ではなく「遅滞なく」である点に注意。",d:3},
+{id:275,s:"海洋汚染等及び海上災害の防止に関する法律",q:"日本国領海等における船舶間貨物油積替えに必要な手続きはどれか。",c:["遅滞なく届出","あらかじめ届出","許可","承認"],a:1,e:"日本国領海等における船舶間貨物油積替えはあらかじめ届出が必要。",d:3},
+{id:276,s:"海洋汚染等及び海上災害の防止に関する法律",q:"船舶からの油等の排出があった場合に必要な手続きはどれか。",c:["遅滞なく届出","あらかじめ届出","直ちに通報","24時間以内に報告"],a:2,e:"船舶からの油等の排出があった場合は直ちに最寄りの海上保安庁の事務所に通報しなければならない。「届出」ではなく「通報」、「遅滞なく」ではなく「直ちに」。",d:2},
+{id:277,s:"海洋汚染等及び海上災害の防止に関する法律",q:"船舶の衝突・乗揚げ・機関の故障等の海難が発生した場合に必要な手続きはどれか。",c:["遅滞なく届出","直ちに海上保安庁長官に通報","24時間以内に報告","あらかじめ届出"],a:1,e:"船舶の衝突・乗揚げ・機関の故障その他の海難が発生した場合は、直ちに海上保安庁長官に通報しなければならない。",d:2},
+{id:278,s:"海洋汚染等及び海上災害の防止に関する法律",q:"海洋施設からの油等の排出（排出のおそれを含む）があった場合に必要な手続きはどれか。",c:["遅滞なく届出","あらかじめ届出","直ちに通報","24時間以内に報告"],a:2,e:"海洋施設からの油等の排出（排出のおそれを含む）があった場合は直ちに通報が必要。",d:2},
+{id:279,s:"海洋汚染等及び海上災害の防止に関する法律",q:"海防法上の規制の全体像において、船舶からの排出規制の対象となるものとして正しいものはどれか。",c:["油のみ","油と廃棄物のみ","油・有害液体物質・廃棄物・排ガス","廃棄物のみ"],a:2,e:"船舶からの排出規制の対象は、油、有害液体物質、廃棄物、排ガス（大気汚染物質）の4種類。航空機からは油と廃棄物のみ。",d:2},
+{id:280,s:"海洋汚染等及び海上災害の防止に関する法律",q:"航空機からの排出規制の対象となるものはどれか。",c:["油・有害液体物質・廃棄物・排ガス","油・廃棄物","油のみ","廃棄物のみ"],a:1,e:"航空機からの排出規制の対象は油と廃棄物のみ。船舶（油・有害液体物質・廃棄物・排ガス）と比較して範囲が狭い。",d:2},
+
+// ── 船員職業安定法60条 ──
+{id:281,s:"船員職業安定法",q:"船員職業安定法第60条第1項の内容として正しいものはどれか。",c:["船員の募集は自由に行える","何人も法律に基づいて許される場合の他、船員の募集に関し、その内容に虚偽があってはならない","募集の報酬は自由に設定できる","船員の紹介事業は届出不要である"],a:1,e:"第60条第1項は、何人も法律に基づいて許される場合の他、船員の募集の内容に虚偽があってはならないと定めている。AAランクの頻出条文。",d:2},
+{id:282,s:"船員職業安定法",q:"船員職業安定法第60条第2項の内容として正しいものはどれか。",c:["募集に応じた被募集者に対する報酬の支払いは自由である","募集に応じて被募集者に対する報酬がいかなることでも行ってはならない","報酬は一定額まで認められる","被募集者への報酬は届出制である"],a:1,e:"第60条第2項は、募集に応じて被募集者に対する報酬（いかなる名義であっても）の供与を禁止している。",d:2},
+{id:283,s:"船員職業安定法",q:"船員職業安定法第60条第3項の内容として正しいものはどれか。",c:["求人の申込みについて報酬を受けることは自由である","求人の申込み又は船員の紹介について報酬を受けてはならない","報酬は国土交通大臣の許可があれば受けられる","紹介手数料は法定額のみ認められる"],a:1,e:"第60条第3項は、求人の申込み又は航海から下船する船の紹介について、いかなる名義であっても報酬を受けてはならないと定めている。",d:2},
+{id:284,s:"船員職業安定法",q:"船員職業安定法上、有料船員職業紹介事業の許可の有効期間について正しいものはどれか。",c:["初回3年、更新後5年","初回5年、更新後3年","常に3年","常に5年"],a:0,e:"有料船員職業紹介事業の許可の有効期間は、初回が3年、更新後は5年。初回と更新後で期間が異なる点に注意。",d:2},
+
+// ── 造船法：許可/届出/報告の区別 ──
+{id:285,s:"造船法",q:"造船施設の新設・増設を行う場合に必要な手続きはどれか。",c:["届出","許可","報告","認可"],a:1,e:"造船施設の新設・増設には国土交通大臣の許可が必要。「しようとするとき」に事前の許可を受ける。",d:1},
+{id:286,s:"造船法",q:"造船法上、タンク・可搬式タンク（5万トン未満）の新設に必要な手続きはどれか。",c:["許可","届出（しようとするとき）","報告","認可"],a:1,e:"タンク・可搬式タンク（5万トン未満）の新設は届出が必要。造船施設の新設（許可）よりも緩やかな規制。",d:2},
+{id:287,s:"造船法",q:"造船法上、設備の新設・増設・改造の工事完了後に必要な手続きはどれか。",c:["許可","届出（工事完了後7日以内）","報告","認可"],a:1,e:"設備の新設・増設・改造は工事完了の7日以内に届出が必要。事前ではなく事後の届出である点に注意。",d:2},
+{id:288,s:"造船法",q:"造船法上、造船事業の開始・休止・廃止に必要な手続きはどれか。",c:["許可","届出","報告","認可"],a:1,e:"造船事業の開始・休止・廃止は届出が必要。",d:1},
+{id:289,s:"造船法",q:"造船法上、造船の設備・生産の状況に関して求められる手続きはどれか。",c:["許可","届出","報告","認可"],a:2,e:"造船の設備・生産の状況については報告が必要。許可や届出ではなく、行政による情報収集としての報告である。",d:2},
+{id:290,s:"造船法",q:"造船法上、総トン数3万トン以上の船舶の造船に関する報告の対象期間はどれか。",c:["半年度","1年度内の実績","四半期ごと","月次"],a:1,e:"総トン数3万トン以上の船舶の造船品、名称・回収・種類等の報告対象は1年度内の実績に限る。",d:3},
+
+// ── 国土交通省設置法：組織根拠法令 ──
+{id:291,s:"国土交通省設置法",q:"海事局の設置について、その根拠となる法令はどれか。",c:["国土交通省組織令","国土交通省設置法","地方運輸局組織細則","国土交通省組織規則"],a:1,e:"海事局の設置は国土交通省設置法が根拠。本省の「設置、課、室」と「所掌事務」は法（国土交通省設置法）が根拠。",d:2},
+{id:292,s:"国土交通省設置法",q:"海事局の外局の所掌事務について、その根拠となる法令はどれか。",c:["国土交通省設置法","国土交通省組織令","地方運輸局組織細則","国土交通省組織規則"],a:1,e:"海事局の外局の所掌事務は国土交通省組織令（令）が根拠。本省が「置かれる」ことと「外局の所掌事務」は令が根拠。",d:3},
+{id:293,s:"国土交通省設置法",q:"地方運輸局の名称・位置・管轄区域について、その根拠となる法令はどれか。",c:["国土交通省設置法","国土交通省組織令","地方運輸局組織細則","国土交通省組織規則"],a:1,e:"地方運輸局の名称・位置・管轄区域は国土交通省組織令（令）が根拠。",d:3},
+{id:294,s:"国土交通省設置法",q:"地方運輸局の課の名称・定員について、その根拠となる法令はどれか。",c:["国土交通省設置法","国土交通省組織令","地方運輸局組織細則","国土交通省組織規則"],a:2,e:"地方運輸局の課の名称・定員は地方運輸局組織細則（地方規則）が根拠。",d:3},
+{id:295,s:"国土交通省設置法",q:"神戸運輸監理部の所掌事務・課の設置について、その根拠となる法令はどれか。",c:["国土交通省設置法","国土交通省組織令","地方運輸局組織細則","国土交通省組織規則"],a:2,e:"神戸運輸監理部の所掌事務及び課の設置は地方運輸局組織細則（地方規則）が根拠。",d:3},
+{id:296,s:"国土交通省設置法",q:"海技試験官の設置について、その根拠となる法令はどれか。",c:["国土交通省設置法","国土交通省組織令","地方運輸局組織細則","国土交通省組織規則"],a:3,e:"海技試験官の設置は国土交通省組織規則（省規則）が根拠。他の組織とは異なる点に注意。",d:3},
+{id:297,s:"国土交通省設置法",q:"海事局の船舶産業課の所掌事務に含まれるものはどれか。",c:["船員の訓練","船舶の生産・流通・消費の増進・改善・調整","海上交通の安全","港湾の管理"],a:1,e:"船舶産業課の所掌事務には、船舶（船用品及び造船施設を含む）の生産、流通及び消費の増進、改善及び調整、船舶の再資源化解体が含まれる。",d:2},
+{id:298,s:"国土交通省設置法",q:"地方運輸局の監理課の所掌事務に含まれるものはどれか。",c:["大型船舶の検査","小型船舶の検査・登録","海技士国家試験","外国船舶の監督"],a:1,e:"地方運輸局の監理課は小型船舶の検査・登録に関する事務を所掌する。大型船舶の検査は船舶安全・海技関係課。",d:2},
+{id:299,s:"国土交通省設置法",q:"地方運輸局の船舶安全・海技関係課の所掌事務に含まれないものはどれか。",c:["大型船舶の検査事務","外国船舶の監督に関する事務","海技士国家試験に関する事務","小型船舶の検査・登録"],a:3,e:"船舶安全・海技関係課は大型船舶の検査、外国船舶の監督、海技士国家試験に関する事務を所掌する。小型船舶の検査・登録は監理課。",d:2},
+{id:300,s:"国土交通省設置法",q:"船員労務官の対象者として正しいものはどれか。",c:["港湾労働者","船長等の船員","造船所労働者","一般労働者"],a:1,e:"船員労務官は船長等の船員を対象とする。陸上の労働基準監督官に相当する役割。",d:1},
+
+// ── 領海等における外国船舶の航行に関する法律 ──
+{id:301,s:"領海等における外国船舶の航行に関する法律",q:"「領海等」とは何を指すか。",c:["領海のみ","領海と内水","領海と接続水域","領海と排他的経済水域"],a:1,e:"「領海等」とは領海と内水を合わせた水域を指す。接続水域やEEZは含まれない。",d:1},
+{id:302,s:"領海等における外国船舶の航行に関する法律",q:"直線基線の内側の水域は何と呼ばれるか。",c:["領海","内水","接続水域","排他的経済水域"],a:1,e:"直線基線の内側の水域は内水と呼ばれる。領海は直線基線から12海里の範囲。",d:1},
+{id:303,s:"領海等における外国船舶の航行に関する法律",q:"日本の領海の幅は直線基線から何海里（約何km）か。",c:["12海里（約22.2km）","24海里（約44.4km）","200海里（約370.4km）","3海里（約5.6km）"],a:0,e:"日本の領海は直線基線から12海里（約22.2km）。接続水域は24海里、EEZは200海里（約370.4km）。",d:1},
+
+// ── 追加：横断整理問題（各法の許可/届出等の比較） ──
+{id:304,s:"海上運送法",q:"次のうち、事業の開始が「許可」制であるものはどれか。",c:["貨物定期航路事業","自動車航送貨物定期航路事業","一般旅客定期航路事業","遊覧旅客不定期航路事業"],a:2,e:"事業の開始が「許可」制：一般旅客定期航路事業、旅客不定期航路事業。「登録」制：自動車航送貨物定期航路事業。「届出」制：貨物定期航路事業、遊覧旅客不定期航路事業。",d:2},
+{id:305,s:"海上運送法",q:"次のうち、事業の開始が「登録」制であるものはどれか。",c:["一般旅客定期航路事業","旅客不定期航路事業","自動車航送貨物定期航路事業","貨物定期航路事業"],a:2,e:"「登録」制は自動車航送貨物定期航路事業。旅客定期・不定期は「許可」、貨物定期は「届出」。",d:2},
+{id:306,s:"内航海運業法",q:"内航海運業法上、船舶の使用休止の届出に関する手続きはどれか。",c:["許可","届出","報告","認可"],a:1,e:"船舶の内航運送への使用休止の制定・変更は届出が必要。",d:1},
+{id:307,s:"海洋汚染等及び海上災害の防止に関する法律",q:"船舶からの油の排出に係る承認の権者は誰か。",c:["環境大臣","海上保安庁長官","国土交通大臣","都道府県知事"],a:2,e:"船舶からの油の排出に係る承認は国土交通大臣が行う。海洋汚染防止に関する試験等（海上保安庁長官の承認）との区別に注意。",d:3},
+{id:308,s:"海洋汚染等及び海上災害の防止に関する法律",q:"海洋施設の設置・変更に必要な手続きはどれか。",c:["許可","届出","承認","報告"],a:1,e:"海洋施設の設置・変更は届出が必要。",d:2},
+{id:309,s:"港則法",q:"港則法第45条により特定港以外にも準用される第39条の内容はどれか。",c:["危険物の荷役","航路・区域を指定して行う交通制限・禁止","入港届出","船舶の修繕届出"],a:1,e:"第39条は航路・区域を指定して行う交通制限・禁止の規定であり、第45条により特定港以外にも準用される。",d:3},
+{id:310,s:"港則法",q:"港則法第45条により特定港以外にも準用される第40条の内容はどれか。",c:["危険物の荷役","漂流物等の除却命令","原子力船に対する規制","いかだの運行許可"],a:2,e:"第40条は原子力船に対する規制の規定であり、第45条により特定港以外にも準用される。",d:3},
+{id:311,s:"港則法",q:"港則法第45条により特定港以外にも準用される第36条の内容はどれか。",c:["危険物の荷役","行先の表示に対する規制","入港届出","錨地の指定"],a:1,e:"第36条は行先の表示に対する規制の規定であり、第45条により特定港以外にも準用される。",d:3},
+{id:312,s:"港則法",q:"港則法第45条により特定港以外にも準用される第38条の内容はどれか。",c:["水路を通行する船舶に対する信号","危険物の荷役","入港届出","船舶の修繕届出"],a:0,e:"第38条は水路を通行する船舶に対する信号の規定であり、第45条により特定港以外にも準用される。",d:3},
+
+// ── 船舶法・手続きの流れ追加問題 ──
+{id:313,s:"船舶法",q:"船舶の譲渡による取得において、登記済証の交付を受けた後に行う手続きはどれか。",c:["総トン数の測度","管海官庁に変更登録を申請する","船舶の検査","新たに登記を行う"],a:1,e:"譲渡による取得では、登記所で所有権移転登記を行い登記済証の交付を受けた後、管海官庁に変更登録を申請する。",d:2},
+{id:314,s:"船舶法",q:"船舶国籍証書の書換え後に行うべき手続きはどれか。",c:["新たに測度を申請する","遅滞なく旧所の船舶国籍証書を返還する","新たに登記を行う","船舶検査を受ける"],a:1,e:"船舶国籍証書の書換え後は、遅滞なく旧所の船舶国籍証書を返還しなければならない。これは譲渡・所有者変更・トン数変更いずれの場合も同様。",d:1},
+{id:315,s:"船舶法",q:"船籍簿の変更登録の手数料はどのように納付するか。",c:["申請書に収入印紙を貼付","手数料納付書に収入印紙を貼付","現金で納付","収入印紙（方法指定なし）"],a:2,e:"船籍簿の変更登録の手数料は収入印紙で納付する。R4で出題実績がある。",d:3},
+
+// ── 海上交通安全法追加 ──
+{id:316,s:"海上交通安全法",q:"伊良湖水道航路はどの湾の入り口にある航路か。",c:["東京湾","大阪湾","伊勢湾","有明海"],a:2,e:"伊良湖水道航路は伊勢湾の入り口にある航路。東京湾の入り口は浦賀水道航路・中ノ瀬航路。",d:1},
+{id:317,s:"海上交通安全法",q:"明石海峡航路はどの海域間にある航路か。",c:["東京湾と太平洋の間","大阪湾と瀬戸内海の間","伊勢湾と太平洋の間","日本海と瀬戸内海の間"],a:1,e:"明石海峡航路は大阪湾と瀬戸内海の間の、淡路島の北にある航路。",d:1},
+{id:318,s:"海上交通安全法",q:"備讃瀬戸南航路の特徴として正しいものはどれか。",c:["双方向通航である","東側の方向に向かう船舶の通航が定められている","北航船のみ通航できる","巨大船専用航路である"],a:1,e:"備讃瀬戸南航路は南側を通る航路で、東側の方向に向かう船舶が通航する。備讃瀬戸北航路とは通航方向が分けられている。",d:2},
+{id:319,s:"海上交通安全法",q:"海上交通安全法上、浦賀水道航路の通航方法として正しいものはどれか。",c:["一方通行","右側通航（北航船・南航船いずれも通航可）","左側通航","北航船のみ通航可"],a:1,e:"浦賀水道航路は右側通航であり、北航船・南航船いずれも通航できる。中ノ瀬航路（北航船のみ通航可）との区別が重要。",d:2},
+{id:320,s:"海上交通安全法",q:"巨大船の緑色全周灯火の間隔として正しいものはどれか。",c:["1.5m以上","2m以上","3m以上","5m以上"],a:2,e:"巨大船は船の前部及び後部に3メートル以上の間隔を有する2個の緑色の全周灯火を表示する。危険物積載船の紅色灯火は1.5m以上。",d:2},
+{id:321,s:"海上交通安全法",q:"危険物積載船の紅色全周灯火の設置場所として正しいものはどれか。",c:["船の前部及び後部","船の最も見えやすい場所","マストの頂部","船尾のみ"],a:1,e:"危険物積載船は船の最も見えやすい場所に1.5m以上の間隔を有する2個の紅色の全周灯火を表示する。巨大船の緑色灯火は「前部及び後部」。",d:2},
+
+// ── 造船法追加 ──
+{id:322,s:"造船法",q:"造船法上、総トン数3万トン以上の場合を除き、一定規模未満の部品の改造はどのような扱いか。",c:["常に許可が必要","許可は不要","届出が必要","報告が必要"],a:1,e:"総トン数3万トン以上の場合を除き、タンク未満の部品の改造も許可できるものとし許可が不要とされている。",d:3},
+
+// ── 横断整理：海防法の届出時期の違い ──
+{id:323,s:"海洋汚染等及び海上災害の防止に関する法律",q:"海防法上の届出について、「あらかじめ」届出が必要なものはどれか。",c:["油濁処理規定の作成・変更","未査定液体物質の輸送","船舶からの油等の排出","海洋施設の設置"],a:1,e:"「あらかじめ」届出が必要なもの：未査定液体物質の輸送、廃油処理事業（港湾管理者等）、船舶間貨物油積替え。「遅滞なく」：油濁処理規定の作成・変更等。",d:3},
+{id:324,s:"海洋汚染等及び海上災害の防止に関する法律",q:"海防法上の「通報」が必要な場面として正しくないものはどれか。",c:["船舶からの油等の排出があったとき","海難が発生したとき","海洋施設からの油等の排出のおそれがあるとき","油濁処理規定を作成したとき"],a:3,e:"油濁処理規定の作成は「遅滞なく届出」であり「通報」ではない。通報が必要なのは、油等の排出があったとき、海難が発生したとき、排出のおそれがあるとき。",d:3},
+
+// ── 船員職業安定法追加 ──
+{id:325,s:"船員職業安定法",q:"船員職業安定法第60条第4項の内容として正しいものはどれか。",c:["第3項の規定は船員関係の規程を排除するものではない","船員の募集は全面的に禁止","報酬は自由に設定できる","届出制で報酬の受領が認められる"],a:0,e:"第60条第4項は、第3項の規定が船員関係の規程を排除するものではないことを定めている。",d:3},
+
+// ── 海上運送法・追加問題 ──
+{id:326,s:"海上運送法",q:"一般旅客定期航路事業における船舶運航計画の設定区間の変更に必要な手続きはどれか。",c:["届出","認可","許可","報告"],a:1,e:"船舶運航計画の設定区間の変更、及び運航の開始・終了の変更には認可が必要。",d:2},
+{id:327,s:"海上運送法",q:"国際旅客船運航事業者の特定航路の設定変更に必要な手続きはどれか。",c:["届出","認可","許可","報告"],a:1,e:"国際旅客船運航事業者の特定航路の設定変更には認可が必要。",d:3}
+];
+
+// ============================================================
+// APPLICATION
+// ============================================================
+const SUBJECTS = [...new Set(QUESTIONS.map(q => q.s))];
+const LS_KEY = 'kaiji_quiz_v2';
+
+// State
+let state = loadState();
+
+function defaultState() {
+  const boxes = {};
+  QUESTIONS.forEach(q => { boxes[q.id] = 1; });
+  return {
+    xp: 0,
+    level: 1,
+    streak: 0,
+    lastDate: null,
+    combo: 0,
+    totalCorrect: 0,
+    totalWrong: 0,
+    boxes: boxes,
+    history: [],
+    dark: false
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      // Add any new questions
+      QUESTIONS.forEach(q => {
+        if (!(q.id in s.boxes)) s.boxes[q.id] = 1;
+      });
+      return s;
+    }
+  } catch(e) {}
+  return defaultState();
+}
+
+function saveState() {
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+}
+
+// ============================================================
+// AUDIO (Web Audio API)
+// ============================================================
+let audioCtx;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playSound(type) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.value = 0.15;
+    if (type === 'correct') {
+      osc.frequency.value = 523.25;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.3);
+      // second tone
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.connect(gain2); gain2.connect(ctx.destination);
+      osc2.frequency.value = 659.25;
+      osc2.type = 'sine';
+      gain2.gain.setValueAtTime(0.15, ctx.currentTime + 0.1);
+      gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc2.start(ctx.currentTime + 0.1);
+      osc2.stop(ctx.currentTime + 0.4);
+    } else if (type === 'incorrect') {
+      osc.frequency.value = 220;
+      osc.type = 'sawtooth';
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.4);
+    } else if (type === 'levelup') {
+      [523,659,784,1047].forEach((f,i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = f;
+        o.type = 'sine';
+        g.gain.setValueAtTime(0.12, ctx.currentTime + i*0.15);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i*0.15 + 0.3);
+        o.start(ctx.currentTime + i*0.15);
+        o.stop(ctx.currentTime + i*0.15 + 0.3);
+      });
+    } else if (type === 'combo') {
+      osc.frequency.value = 880;
+      osc.type = 'triangle';
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.2);
+    }
+  } catch(e) {}
+}
+
+// ============================================================
+// CONFETTI
+// ============================================================
+function fireConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx2 = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const particles = [];
+  const colors = ['#f6ad55','#fc8181','#48bb78','#4299e1','#ed64a6','#fbd38d'];
+  for (let i = 0; i < 100; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * 100,
+      w: 6 + Math.random() * 6,
+      h: 4 + Math.random() * 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vx: (Math.random() - 0.5) * 4,
+      vy: 2 + Math.random() * 4,
+      rot: Math.random() * 360,
+      rv: (Math.random() - 0.5) * 10,
+      life: 1
+    });
+  }
+  let frame;
+  function animate() {
+    ctx2.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    particles.forEach(p => {
+      if (p.life <= 0) return;
+      alive = true;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.1;
+      p.rot += p.rv;
+      p.life -= 0.005;
+      ctx2.save();
+      ctx2.translate(p.x, p.y);
+      ctx2.rotate(p.rot * Math.PI / 180);
+      ctx2.globalAlpha = p.life;
+      ctx2.fillStyle = p.color;
+      ctx2.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx2.restore();
+    });
+    if (alive) frame = requestAnimationFrame(animate);
+    else ctx2.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  animate();
+  setTimeout(() => { cancelAnimationFrame(frame); ctx2.clearRect(0, 0, canvas.width, canvas.height); }, 4000);
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function switchScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.screen === name);
+  });
+  if (name === 'dashboard') updateDashboard();
+  if (name === 'progress') updateProgress();
+  if (name === 'mode-select') { document.getElementById('subject-select-area').style.display = 'none'; }
+  // Stop timer if leaving quiz
+  if (name !== 'quiz' && timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+document.querySelectorAll('.nav-btn[data-screen]').forEach(btn => {
+  btn.addEventListener('click', () => switchScreen(btn.dataset.screen));
+});
+
+// ============================================================
+// DARK MODE
+// ============================================================
+function applyDark() {
+  document.body.classList.toggle('dark', state.dark);
+  document.getElementById('dark-toggle').textContent = state.dark ? '☀️' : '🌙';
+}
+document.getElementById('dark-toggle').addEventListener('click', () => {
+  state.dark = !state.dark;
+  applyDark();
+  saveState();
+});
+applyDark();
+
+// ============================================================
+// STREAK
+// ============================================================
+function updateStreak() {
+  const today = new Date().toISOString().split('T')[0];
+  if (state.lastDate === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  if (state.lastDate === yesterday) {
+    state.streak++;
+  } else if (state.lastDate !== today) {
+    state.streak = 1;
+  }
+  state.lastDate = today;
+  saveState();
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function updateDashboard() {
+  const total = state.totalCorrect + state.totalWrong;
+  const accuracy = total > 0 ? Math.round(state.totalCorrect / total * 100) : 0;
+  const mastered = Object.values(state.boxes).filter(b => b === 5).length;
+  document.getElementById('dash-total').textContent = total.toLocaleString();
+  document.getElementById('dash-accuracy').textContent = accuracy + '%';
+  document.getElementById('dash-mastered').textContent = mastered;
+  document.getElementById('dash-streak').textContent = state.streak + '日';
+
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById('lb-' + i).textContent = Object.values(state.boxes).filter(b => b === i).length;
+  }
+  updateHeader();
+}
+
+function updateHeader() {
+  document.getElementById('hdr-level').textContent = state.level;
+  document.getElementById('hdr-xp').textContent = state.xp.toLocaleString();
+  document.getElementById('hdr-streak').textContent = state.streak;
+  const xpForLevel = state.level * 100;
+  const xpInLevel = state.xp - (state.level - 1) * 100;
+  const pct = Math.min(100, Math.max(0, (xpInLevel / 100) * 100));
+  document.getElementById('xp-bar').style.width = pct + '%';
+}
+
+// ============================================================
+// PROGRESS
+// ============================================================
+function updateProgress() {
+  const list = document.getElementById('progress-list');
+  list.innerHTML = '';
+  SUBJECTS.forEach(subj => {
+    const qs = QUESTIONS.filter(q => q.s === subj);
+    const masteredCount = qs.filter(q => state.boxes[q.id] >= 4).length;
+    const pct = Math.round(masteredCount / qs.length * 100);
+    const item = document.createElement('div');
+    item.className = 'progress-item';
+    item.innerHTML = `
+      <div class="progress-name">${subj}</div>
+      <div class="progress-bar"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+      <div class="progress-pct">${pct}%</div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+// ============================================================
+// MODE SELECTION
+// ============================================================
+function showSubjectSelect() {
+  const area = document.getElementById('subject-select-area');
+  area.style.display = 'block';
+  const list = document.getElementById('subject-list');
+  list.innerHTML = '';
+  SUBJECTS.forEach(subj => {
+    const qs = QUESTIONS.filter(q => q.s === subj);
+    const masteredCount = qs.filter(q => state.boxes[q.id] >= 4).length;
+    const pct = Math.round(masteredCount / qs.length * 100);
+    const item = document.createElement('div');
+    item.className = 'subject-item';
+    item.innerHTML = `
+      <span>${subj} (${qs.length})</span>
+      <div class="subj-bar"><div class="subj-bar-fill" style="width:${pct}%"></div></div>
+    `;
+    item.addEventListener('click', () => startMode('subject', subj));
+    list.appendChild(item);
+  });
+}
+
+// ============================================================
+// QUIZ ENGINE
+// ============================================================
+let quizQueue = [];
+let quizIndex = 0;
+let sessionCorrect = 0;
+let sessionWrong = 0;
+let sessionXP = 0;
+let timerInterval = null;
+let timerRemaining = 0;
+let currentMode = '';
+
+function selectQuestions(mode, subject) {
+  let pool = [];
+  if (mode === 'weakness') {
+    pool = QUESTIONS.filter(q => state.boxes[q.id] <= 2);
+    if (pool.length < 10) {
+      const extra = QUESTIONS.filter(q => state.boxes[q.id] === 3);
+      pool = pool.concat(extra);
+    }
+    if (pool.length < 5) pool = [...QUESTIONS];
+  } else if (mode === 'subject') {
+    pool = QUESTIONS.filter(q => q.s === subject);
+  } else if (mode === 'timeattack') {
+    pool = [...QUESTIONS];
+  } else {
+    pool = [...QUESTIONS];
+  }
+  // Weighted shuffle: lower box = higher weight
+  pool.sort(() => Math.random() - 0.5);
+  pool.sort((a, b) => {
+    const wa = 6 - state.boxes[a.id];
+    const wb = 6 - state.boxes[b.id];
+    return (wb + Math.random()*2) - (wa + Math.random()*2);
+  });
+  const count = mode === 'timeattack' ? 30 : Math.min(20, pool.length);
+  return pool.slice(0, count);
+}
+
+function startMode(mode, subject) {
+  currentMode = mode;
+  quizQueue = selectQuestions(mode, subject);
+  quizIndex = 0;
+  sessionCorrect = 0;
+  sessionWrong = 0;
+  sessionXP = 0;
+  state.combo = 0;
+
+  updateStreak();
+  switchScreen('quiz');
+
+  // Timer
+  const timerArea = document.getElementById('timer-area');
+  if (mode === 'timeattack') {
+    timerArea.style.display = 'block';
+    timerRemaining = 300; // 5 min
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+      timerRemaining--;
+      updateTimerDisplay();
+      if (timerRemaining <= 0) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        showResults();
+      }
+    }, 1000);
+  } else {
+    timerArea.style.display = 'none';
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  }
+
+  showQuestion();
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerRemaining / 60);
+  const s = timerRemaining % 60;
+  document.getElementById('timer-text').textContent = m + ':' + String(s).padStart(2,'0');
+  document.getElementById('timer-bar-fill').style.width = (timerRemaining / 300 * 100) + '%';
+}
+
+function showQuestion() {
+  if (quizIndex >= quizQueue.length) {
+    showResults();
+    return;
+  }
+  const q = quizQueue[quizIndex];
+  const box = state.boxes[q.id];
+
+  document.getElementById('quiz-progress').textContent = (quizIndex + 1) + ' / ' + quizQueue.length;
+  document.getElementById('quiz-subject-tag').textContent = q.s;
+  document.getElementById('question-num').textContent = 'Q' + (quizIndex + 1);
+  document.getElementById('question-text').textContent = q.q;
+
+  // Leitner box tag
+  const boxTag = document.getElementById('leitner-box-tag');
+  boxTag.textContent = 'Box ' + box;
+  boxTag.className = 'leitner-box-tag box-' + box;
+
+  // Difficulty stars
+  const diffEl = document.getElementById('quiz-difficulty');
+  diffEl.innerHTML = '';
+  for (let i = 1; i <= 3; i++) {
+    diffEl.innerHTML += `<span class="star ${i <= q.d ? '' : 'empty'}">★</span>`;
+  }
+
+  // Choices
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  const labels = ['A','B','C','D'];
+  q.c.forEach((choice, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-label">${labels[idx]}</span><span>${choice}</span>`;
+    btn.addEventListener('click', () => handleAnswer(idx));
+    choicesEl.appendChild(btn);
+  });
+
+  // Hide explanation and next
+  document.getElementById('explanation').classList.remove('show');
+  document.getElementById('next-btn').classList.remove('show');
+
+  // Combo display
+  updateComboDisplay();
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function handleAnswer(chosenIdx) {
+  const q = quizQueue[quizIndex];
+  const isCorrect = chosenIdx === q.a;
+  const buttons = document.querySelectorAll('.choice-btn');
+
+  // Disable all buttons
+  buttons.forEach((btn, idx) => {
+    btn.classList.add('disabled');
+    if (idx === q.a) btn.classList.add('show-correct');
+  });
+
+  // Mark chosen
+  if (isCorrect) {
+    buttons[chosenIdx].classList.add('correct');
+    state.combo++;
+    const multiplier = Math.min(5, state.combo);
+    const xpGained = 10 * multiplier;
+    state.xp += xpGained;
+    sessionXP += xpGained;
+    state.totalCorrect++;
+    sessionCorrect++;
+
+    // Leitner: move up
+    if (state.boxes[q.id] < 5) state.boxes[q.id]++;
+
+    playSound('correct');
+    showFlash('correct');
+
+    // Check level up
+    const newLevel = Math.floor(state.xp / 100) + 1;
+    if (newLevel > state.level) {
+      state.level = newLevel;
+      setTimeout(() => {
+        playSound('levelup');
+        fireConfetti();
+        document.getElementById('levelup-text').textContent = `レベル${state.level}に到達しました！`;
+        document.getElementById('levelup-modal').classList.add('show');
+      }, 400);
+    }
+
+    if (state.combo > 1) {
+      setTimeout(() => playSound('combo'), 150);
+    }
+  } else {
+    buttons[chosenIdx].classList.add('incorrect');
+    state.combo = 0;
+    state.totalWrong++;
+    sessionWrong++;
+
+    // Leitner: back to box 1
+    state.boxes[q.id] = 1;
+
+    playSound('incorrect');
+    showFlash('incorrect');
+  }
+
+  // Show explanation
+  document.getElementById('explanation-text').textContent = q.e;
+  document.getElementById('explanation').classList.add('show');
+  document.getElementById('next-btn').classList.add('show');
+
+  updateComboDisplay();
+  updateHeader();
+  saveState();
+}
+
+function nextQuestion() {
+  quizIndex++;
+  showQuestion();
+}
+
+function showFlash(type) {
+  const el = document.getElementById('feedback-flash');
+  el.className = 'feedback-flash';
+  el.textContent = type === 'correct' ? '⭕' : '✖';
+  void el.offsetWidth; // reflow
+  el.classList.add(type === 'correct' ? 'correct-flash' : 'incorrect-flash');
+}
+
+function updateComboDisplay() {
+  const el = document.getElementById('combo-display');
+  const badge = document.getElementById('combo-badge');
+  const hdrCombo = document.getElementById('hdr-combo');
+  const hdrComboVal = document.getElementById('hdr-combo-val');
+  if (state.combo >= 2) {
+    const mult = Math.min(5, state.combo);
+    badge.textContent = `${state.combo}連続正解！ x${mult}`;
+    el.style.display = 'block';
+    badge.style.animation = 'none';
+    void badge.offsetWidth;
+    badge.style.animation = 'comboPulse .5s ease';
+    hdrCombo.style.display = 'flex';
+    hdrComboVal.textContent = mult;
+  } else {
+    el.style.display = 'none';
+    hdrCombo.style.display = 'none';
+  }
+}
+
+function closeLevelUp() {
+  document.getElementById('levelup-modal').classList.remove('show');
+}
+
+// ============================================================
+// RESULTS
+// ============================================================
+function showResults() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  const total = sessionCorrect + sessionWrong;
+  const pct = total > 0 ? Math.round(sessionCorrect / total * 100) : 0;
+  document.getElementById('result-score').textContent = pct + '%';
+  document.getElementById('res-correct').textContent = sessionCorrect;
+  document.getElementById('res-wrong').textContent = sessionWrong;
+  document.getElementById('res-xp').textContent = '+' + sessionXP;
+  switchScreen('results');
+  if (pct >= 80) fireConfetti();
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function exportData() {
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'kaiji_quiz_progress_' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData() {
+  const input = document.getElementById('import-file');
+  input.click();
+  input.onchange = () => {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.boxes && data.xp !== undefined) {
+          state = data;
+          // Add missing questions
+          QUESTIONS.forEach(q => {
+            if (!(q.id in state.boxes)) state.boxes[q.id] = 1;
+          });
+          saveState();
+          updateDashboard();
+          alert('インポートが完了しました。');
+        } else {
+          alert('無効なデータ形式です。');
+        }
+      } catch(e) {
+        alert('ファイルの読み込みに失敗しました。');
+      }
+    };
+    reader.readAsText(file);
+    input.value = '';
+  };
+}
+
+function resetData() {
+  if (confirm('全ての学習データをリセットしますか？この操作は取り消せません。')) {
+    if (confirm('本当にリセットしてよろしいですか？')) {
+      state = defaultState();
+      saveState();
+      updateDashboard();
+      switchScreen('dashboard');
+      alert('データをリセットしました。');
+    }
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.getElementById('info-total-q').textContent = QUESTIONS.length;
+updateDashboard();
+updateHeader();
+</script>
+</body>
+</html>
